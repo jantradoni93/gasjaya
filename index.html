@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        :root{--primary:#2563eb;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--bg:#f8fafc;--card:#fff;--text:#1e293b;--border:#e2e8f0}
+        :root{--primary:#2563eb;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#06b6d4;--bg:#f8fafc;--card:#fff;--text:#1e293b;--border:#e2e8f0}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
         .header{background:linear-gradient(135deg,var(--primary)0%,#1d4ed8 100%);color:#fff;padding:1rem;position:sticky;top:0;z-index:100}
         .container{max-width:1400px;margin:0 auto;padding:1rem}
@@ -23,10 +23,10 @@
         .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:1rem}
         @media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
         .stat{background:#fff;padding:1rem;border-radius:0.5rem;border-left:4px solid var(--primary);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-        .stat.success{border-left-color:var(--success)}.stat.warning{border-left-color:var(--warning)}.stat.danger{border-left-color:var(--danger)}
+        .stat.success{border-left-color:var(--success)}.stat.warning{border-left-color:var(--warning)}.stat.danger{border-left-color:var(--danger)}.stat.info{border-left-color:var(--info)}
         .stat-value{font-size:1.25rem;font-weight:700}
         .form-grid{display:grid;grid-template-columns:1fr;gap:0.75rem}
-        @media(min-width:768px){.form-grid{grid-template-columns:repeat(2,1fr)}.span-2{grid-column:span 2}}
+        @media(min-width:768px){.form-grid{grid-template-columns:repeat(2,1fr)}.span-2{grid-column:span 2}.span-3{grid-column:span 3}}
         .form-group{margin-bottom:0.5rem}
         .form-label{display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.25rem}
         .form-input,.form-select{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:0.5rem;font-size:16px;background:#fff}
@@ -38,8 +38,9 @@
         .btn{padding:0.625rem 1rem;border:none;border-radius:0.5rem;font-size:0.9375rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;min-height:44px;transition:all 0.2s}
         .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:#1d4ed8}
         .btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#059669}
-        .btn-warning{background:var(--warning);color:#fff}
-        .btn-danger{background:var(--danger);color:#fff}
+        .btn-warning{background:var(--warning);color:#fff}.btn-warning:hover{background:#d97706}
+        .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#dc2626}
+        .btn-info{background:var(--info);color:#fff}.btn-info:hover{background:#0891b2}
         .btn-outline{border:1px solid var(--border);background:#fff;color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
         .btn-sm{padding:0.375rem 0.75rem;font-size:0.875rem;min-height:36px}
         .btn-lg{padding:0.75rem 1.5rem;font-size:1rem}
@@ -53,15 +54,16 @@
         th{background:#f1f5f9;font-weight:600;font-size:0.75rem;text-transform:uppercase;color:#64748b;white-space:nowrap}
         tr:hover{background:#f8fafc}
         .badge{padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:600}
-        .badge-success{background:#d1fae5;color:#065f46}.badge-warning{background:#fef3c7;color:#92400e}.badge-danger{background:#fee2e2;color:#991b1b}
+        .badge-success{background:#d1fae5;color:#065f46}.badge-warning{background:#fef3c7;color:#92400e}.badge-danger{background:#fee2e2;color:#991b1b}.badge-info{background:#cffafe;color:#0e7490}
         .upload-zone{border:2px dashed var(--border);border-radius:0.5rem;padding:2rem;text-align:center;cursor:pointer;background:var(--bg);transition:all 0.2s}
         .upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:#f0f9ff}
         .upload-icon{font-size:3rem;margin-bottom:0.5rem}
         .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;padding:1rem;backdrop-filter:blur(4px)}
         .modal.active{display:flex;align-items:center;justify-content:center}
-        .modal-content{background:#fff;border-radius:1rem;max-width:500px;width:100%;max-height:90vh;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.25)}
+        .modal-content{background:#fff;border-radius:1rem;max-width:600px;width:100%;max-height:90vh;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.25)}
+        .modal-content.large{max-width:900px}
         .modal-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-        .modal-body{padding:1rem;overflow-y:auto;max-height:60vh}
+        .modal-body{padding:1rem;overflow-y:auto;max-height:70vh}
         .modal-footer{padding:1rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.5rem;background:#f8fafc}
         .nota{font-family:'Courier New',monospace;font-size:12px;line-height:1.4;padding:1rem;background:#fff}
         .nota-header{text-align:center;border-bottom:2px solid #000;padding-bottom:0.5rem;margin-bottom:0.5rem}
@@ -101,9 +103,35 @@
         .settings-title{font-size:0.875rem;font-weight:600;color:#64748b;margin-bottom:0.75rem;text-transform:uppercase}
         .checkbox-wrapper{display:flex;align-items:center;gap:0.5rem;cursor:pointer}
         .checkbox-wrapper input[type="checkbox"]{width:18px;height:18px;cursor:pointer}
-        @media print{@page{size:80mm 297mm;margin:0}body *{visibility:hidden}.nota,.nota *{visibility:visible}.nota{position:absolute;left:0;top:0;width:80mm;padding:5mm}.no-print{display:none!important}}
+        
+        /* Supplier specific styles */
+        .supplier-card{background:#fff;border:1px solid var(--border);border-radius:0.5rem;padding:1rem;margin-bottom:0.75rem;transition:all 0.2s}
+        .supplier-card:hover{box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+        .supplier-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem}
+        .supplier-name{font-weight:600;font-size:1rem;color:var(--text)}
+        .supplier-bank{display:inline-block;background:var(--info);color:#fff;padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;font-weight:500}
+        .supplier-rek{font-family:monospace;font-size:0.875rem;color:#64748b;margin-top:0.25rem}
+        .supplier-atasnama{font-size:0.875rem;color:var(--text);margin-top:0.25rem}
+        .supplier-actions{display:flex;gap:0.5rem;margin-top:0.75rem}
+        .supplier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+        
+        /* Laporan Keuangan styles */
+        .laporan-header{background:linear-gradient(135deg,var(--success)0%,#059669 100%);color:#fff;padding:1.5rem;border-radius:0.75rem;margin-bottom:1rem}
+        .laporan-title{font-size:1.25rem;font-weight:700;margin-bottom:0.25rem}
+        .laporan-subtitle{font-size:0.875rem;opacity:0.9}
+        .rekap-box{background:#fff;border:2px solid var(--success);border-radius:0.5rem;padding:1rem;margin-bottom:1rem}
+        .rekap-title{font-size:0.875rem;color:#64748b;text-transform:uppercase;margin-bottom:0.5rem}
+        .rekap-value{font-size:1.5rem;font-weight:700;color:var(--success)}
+        .pembayaran-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-bottom:1px solid var(--border)}
+        .pembayaran-row:last-child{border-bottom:none}
+        .pembayaran-info{flex:1}
+        .pembayaran-nama{font-weight:600}
+        .pembayaran-detail{font-size:0.875rem;color:#64748b}
+        .pembayaran-jumlah{text-align:right;font-weight:700;color:var(--success)}
+        .bank-info{background:#f0f9ff;border:1px solid #e0f2fe;border-radius:0.375rem;padding:0.5rem;margin-top:0.5rem;font-size:0.875rem}
+        
+        @media print{@page{size:80mm 297mm;margin:0}body *{visibility:hidden}.nota,.nota *{visibility:visible}.nota{position:absolute;left:0;top:0;width:80mm;padding:5mm}.no-print{display:none!important}.laporan-print{visibility:visible!important;position:absolute;left:0;top:0;width:100%;padding:20px}.laporan-print *{visibility:visible!important}}
     </style>
-<base target="_blank">
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -145,6 +173,12 @@
                 <button class="nav-btn" onclick="app.switchTab('riwayat', this)" aria-label="Riwayat Transaksi">
                     <span>📋</span> Riwayat
                 </button>
+                <button class="nav-btn" onclick="app.switchTab('supplier', this)" aria-label="Data Supplier">
+                    <span>🏢</span> Supplier
+                </button>
+                <button class="nav-btn" onclick="app.switchTab('laporan', this)" aria-label="Laporan Keuangan">
+                    <span>💰</span> Laporan
+                </button>
                 <button class="nav-btn" onclick="app.switchTab('data', this)" aria-label="Manajemen Data">
                     <span>💾</span> Data
                 </button>
@@ -173,9 +207,9 @@
                     <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase">Total Nilai</div>
                     <div class="stat-value">Rp <span id="stat-nilai">0</span></div>
                 </div>
-                <div class="stat danger">
-                    <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase">Belum Lunas</div>
-                    <div class="stat-value" id="stat-pending">0</div>
+                <div class="stat info">
+                    <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase">Total Supplier</div>
+                    <div class="stat-value" id="stat-supplier">0</div>
                 </div>
             </div>
 
@@ -235,8 +269,31 @@
                                 </div>
                                 <div class="form-group span-2">
                                     <label class="form-label" for="inp-supplier">Nama Supplier *</label>
-                                    <input type="text" class="form-input" id="inp-supplier" list="list-supplier" placeholder="Nama perusahaan/supplier" required aria-required="true" maxlength="100">
-                                    <datalist id="list-supplier"></datalist>
+                                    <select class="form-select" id="inp-supplier" onchange="app.onSupplierChange()" required aria-required="true">
+                                        <option value="">-- Pilih Supplier --</option>
+                                    </select>
+                                    <small style="color:#64748b;font-size:0.75rem;margin-top:0.25rem;display:block">
+                                        <a href="#" onclick="app.switchTab('supplier', document.querySelectorAll('.nav-btn')[3]); return false;" style="color:var(--primary)">+ Tambah supplier baru</a>
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Info Rekening Supplier (Auto-fill) -->
+                            <div id="supplier-info-display" style="display:none;margin-top:1rem;padding:1rem;background:#f0f9ff;border:1px solid #e0f2fe;border-radius:0.5rem">
+                                <div style="font-size:0.875rem;color:#64748b;margin-bottom:0.5rem">Informasi Pembayaran:</div>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem">
+                                    <div>
+                                        <div style="font-size:0.75rem;color:#64748b">Bank</div>
+                                        <div style="font-weight:600" id="disp-bank">-</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.75rem;color:#64748b">Atas Nama</div>
+                                        <div style="font-weight:600" id="disp-atasnama">-</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.75rem;color:#64748b">No. Rekening</div>
+                                        <div style="font-weight:600;font-family:monospace" id="disp-rekening">-</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -416,6 +473,125 @@
             </div>
         </section>
 
+        <!-- SUPPLIER DATABASE - FITUR BARU -->
+        <section id="supplier" class="tab-content" style="display:none" aria-label="Data Supplier">
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                        <span>🏢</span> Database Supplier
+                    </h2>
+                    <button class="btn btn-primary btn-sm" onclick="app.openSupplierModal()">
+                        <span>+</span> Tambah Supplier
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="filter-bar">
+                        <div class="search-box" style="flex:1;max-width:400px">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="form-input" id="supplier-search" placeholder="Cari nama supplier, bank, atau rekening..." oninput="app.renderSupplierList()">
+                        </div>
+                    </div>
+                    
+                    <div id="supplier-list" class="supplier-grid">
+                        <div class="empty" style="grid-column:1/-1">
+                            <div class="empty-icon">🏢</div>
+                            <div style="font-weight:600;margin-bottom:0.5rem">Belum ada data supplier</div>
+                            <p style="font-size:0.875rem">Tambahkan supplier untuk memudahkan input transaksi dan laporan pembayaran</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LAPORAN KEUANGAN - FITUR BARU -->
+        <section id="laporan" class="tab-content" style="display:none" aria-label="Laporan Keuangan">
+            <div class="laporan-header no-print">
+                <div class="laporan-title">💰 Laporan Pembayaran Supplier</div>
+                <div class="laporan-subtitle">Ringkasan transaksi harian untuk bagian keuangan</div>
+            </div>
+
+            <div class="card no-print">
+                <div class="card-header">
+                    <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                        <span>📅</span> Filter Periode
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Mulai</label>
+                            <input type="date" class="form-input" id="laporan-start" onchange="app.generateLaporan()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Selesai</label>
+                            <input type="date" class="form-input" id="laporan-end" onchange="app.generateLaporan()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status Pembayaran</label>
+                            <select class="form-select" id="laporan-status" onchange="app.generateLaporan()">
+                                <option value="all">Semua Status</option>
+                                <option value="Belum Lunas">Belum Lunas (Pending)</option>
+                                <option value="Dicicil">Dicicil (Partial)</option>
+                                <option value="Lunas">Lunas (Paid)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="display:flex;align-items:end">
+                            <button class="btn btn-secondary" onclick="app.resetLaporanFilter()" style="width:100%">
+                                <span>↺</span> Reset Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="laporan-content" style="display:none">
+                <div class="rekap-box no-print">
+                    <div class="rekap-title">Total yang Harus Dibayarkan</div>
+                    <div class="rekap-value" id="laporan-total">Rp 0</div>
+                    <div style="margin-top:0.5rem;font-size:0.875rem;color:#64748b">
+                        <span id="laporan-count">0</span> transaksi dari <span id="laporan-supplier-count">0</span> supplier
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="flex-wrap:wrap;gap:0.5rem">
+                        <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                            <span>📋</span> Detail Pembayaran per Supplier
+                        </h2>
+                        <div style="display:flex;gap:0.5rem">
+                            <button class="btn btn-success btn-sm" onclick="app.exportLaporanCSV()">
+                                <span>📥</span> Export CSV
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="window.print()">
+                                <span>🖨️</span> Cetak Laporan
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="laporan-detail">
+                        <!-- Generated content -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="laporan-empty" class="card" style="display:block">
+                <div class="card-body" style="text-align:center;padding:3rem">
+                    <div class="empty-icon">📊</div>
+                    <div style="font-weight:600;margin-bottom:0.5rem">Pilih periode untuk melihat laporan</div>
+                    <p style="font-size:0.875rem;color:#64748b">Laporan akan menampilkan ringkasan pembayaran yang harus dilakukan ke masing-masing supplier</p>
+                </div>
+            </div>
+
+            <!-- Printable Version -->
+            <div id="laporan-printable" class="laporan-print" style="display:none">
+                <div style="text-align:center;margin-bottom:2rem;border-bottom:2px solid #000;padding-bottom:1rem">
+                    <h1 style="font-size:24px;margin-bottom:0.5rem">LAPORAN PEMBAYARAN SUPPLIER</h1>
+                    <p style="font-size:14px;color:#666">Timbangan Gas Jaya</p>
+                    <p style="font-size:12px;color:#666" id="print-periode">Periode: -</p>
+                </div>
+                <div id="print-content"></div>
+            </div>
+        </section>
+
         <!-- DATA -->
         <section id="data" class="tab-content" style="display:none" aria-label="Manajemen Data">
             <div class="card">
@@ -492,7 +668,7 @@
             </div>
         </section>
 
-        <!-- PENGATURAN BARU -->
+        <!-- PENGATURAN -->
         <section id="pengaturan" class="tab-content" style="display:none" aria-label="Pengaturan">
             <div class="card">
                 <div class="card-header">
@@ -631,11 +807,70 @@
         </div>
     </div>
 
+    <!-- Modal Supplier - FITUR BARU -->
+    <div class="modal" id="modal-supplier" onclick="if(event.target===this)app.closeSupplierModal()" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="display:flex;align-items:center;gap:0.5rem">
+                    <span>🏢</span> <span id="supplier-modal-title">Tambah Supplier</span>
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="app.closeSupplierModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-supplier" onsubmit="return app.saveSupplier(event)">
+                    <input type="hidden" id="supplier-id">
+                    <div class="form-grid">
+                        <div class="form-group span-2">
+                            <label class="form-label" for="supplier-nama">Nama Supplier *</label>
+                            <input type="text" class="form-input" id="supplier-nama" required maxlength="100" placeholder="PT Gas Makmur">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="supplier-bank">Nama Bank *</label>
+                            <select class="form-select" id="supplier-bank" required>
+                                <option value="">Pilih Bank</option>
+                                <option value="BCA">BCA</option>
+                                <option value="Mandiri">Mandiri</option>
+                                <option value="BNI">BNI</option>
+                                <option value="BRI">BRI</option>
+                                <option value="BSI">BSI</option>
+                                <option value="CIMB">CIMB Niaga</option>
+                                <option value="Danamon">Danamon</option>
+                                <option value="Permata">Permata</option>
+                                <option value="Maybank">Maybank</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="supplier-rekening">Nomor Rekening *</label>
+                            <input type="text" class="form-input" id="supplier-rekening" required maxlength="30" placeholder="1234567890">
+                        </div>
+                        <div class="form-group span-2">
+                            <label class="form-label" for="supplier-atasnama">Atas Nama Rekening *</label>
+                            <input type="text" class="form-input" id="supplier-atasnama" required maxlength="100" placeholder="Nama lengkap pemilik rekening">
+                        </div>
+                        <div class="form-group span-2">
+                            <label class="form-label" for="supplier-keterangan">Keterangan (Opsional)</label>
+                            <textarea class="form-input" id="supplier-keterangan" rows="2" maxlength="200" placeholder="Alamat, kontak, atau catatan lain"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+                        <button type="submit" class="btn btn-primary" style="flex:1">
+                            <span>💾</span> Simpan
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="app.closeSupplierModal()" style="flex:1">
+                            <span>✕</span> Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script>
         /**
-         * Timbangan Gas Jaya - Stabilized Version with Settings
-         * Features: Editable nota address, floor rounding for netto
+         * Timbangan Gas Jaya - Version 3.0
+         * Features: Supplier Database, Financial Reports, Edit Transaction
          */
         
         const app = (function() {
@@ -645,14 +880,16 @@
             // CONSTANTS & CONFIG
             // ==========================================
             const CONFIG = {
-                STORAGE_KEY: 'gasjaya_data_v2',
-                STORAGE_SETTINGS: 'gasjaya_settings_v2',
-                STORAGE_META: 'gasjaya_meta_v2',
+                STORAGE_KEY: 'gasjaya_data_v3',
+                STORAGE_SUPPLIER: 'gasjaya_suppliers_v3',
+                STORAGE_SETTINGS: 'gasjaya_settings_v3',
+                STORAGE_META: 'gasjaya_meta_v3',
                 MAX_TRANSACTIONS: 5000,
+                MAX_SUPPLIERS: 200,
                 ITEMS_PER_PAGE: 50,
                 MAX_INPUT_LENGTH: 100,
                 DEBOUNCE_DELAY: 300,
-                VERSION: '2.1.0'
+                VERSION: '3.0.0'
             };
 
             const DEFAULT_SETTINGS = {
@@ -669,8 +906,10 @@
             // ==========================================
             let state = {
                 transactions: [],
+                suppliers: [], // FITUR BARU: Database supplier
                 currentImport: [],
                 editingId: null,
+                editingSupplierId: null, // FITUR BARU
                 currentPage: 1,
                 isProcessing: false,
                 settings: { ...DEFAULT_SETTINGS }
@@ -730,7 +969,6 @@
                     return Number(num.toFixed(decimals));
                 },
 
-                // FLOOR / PEMBULATAN KEBAWAH
                 floorNumber: (value) => {
                     return Math.floor(parseFloat(value) || 0);
                 },
@@ -763,6 +1001,12 @@
                         hash = hash & hash;
                     }
                     return Math.abs(hash).toString(16).slice(0, 8);
+                },
+
+                // FITUR BARU: Format nomor rekening
+                formatRekening: (rek) => {
+                    if (!rek) return '-';
+                    return String(rek).replace(/(\d{4})(?=\d)/g, '$1-');
                 }
             };
 
@@ -837,7 +1081,37 @@
                     }
                 },
 
-                // SETTINGS STORAGE
+                // FITUR BARU: Storage untuk supplier
+                saveSuppliers: () => {
+                    try {
+                        localStorage.setItem(CONFIG.STORAGE_SUPPLIER, JSON.stringify({
+                            data: state.suppliers,
+                            version: CONFIG.VERSION,
+                            timestamp: new Date().toISOString()
+                        }));
+                        return true;
+                    } catch (e) {
+                        console.error('Supplier save error:', e);
+                        return false;
+                    }
+                },
+
+                loadSuppliers: () => {
+                    try {
+                        const stored = localStorage.getItem(CONFIG.STORAGE_SUPPLIER);
+                        if (stored) {
+                            const payload = JSON.parse(stored);
+                            if (payload && Array.isArray(payload.data)) {
+                                state.suppliers = payload.data;
+                                console.log(`Loaded ${state.suppliers.length} suppliers`);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Supplier load error:', e);
+                        state.suppliers = [];
+                    }
+                },
+
                 saveSettings: () => {
                     try {
                         localStorage.setItem(CONFIG.STORAGE_SETTINGS, JSON.stringify(state.settings));
@@ -970,6 +1244,32 @@
                         isValid: errors.length === 0,
                         errors: errors
                     };
+                },
+
+                // FITUR BARU: Validasi supplier
+                validateSupplier: (s) => {
+                    const errors = [];
+                    
+                    if (!s.nama || s.nama.length < 2) {
+                        errors.push('Nama supplier minimal 2 karakter');
+                    }
+                    
+                    if (!s.bank) {
+                        errors.push('Pilih bank');
+                    }
+                    
+                    if (!s.rekening || s.rekening.length < 5) {
+                        errors.push('Nomor rekening tidak valid');
+                    }
+                    
+                    if (!s.atasNama || s.atasNama.length < 2) {
+                        errors.push('Atas nama rekening harus diisi');
+                    }
+                    
+                    return {
+                        isValid: errors.length === 0,
+                        errors: errors
+                    };
                 }
             };
 
@@ -981,15 +1281,19 @@
                 console.log(`Gas Jaya App v${CONFIG.VERSION} Loaded`);
                 
                 storage.load();
-                storage.loadSettings(); // Load settings
+                storage.loadSuppliers(); // FITUR BARU
+                storage.loadSettings();
                 initDateTime();
                 updateStats();
                 renderRecent();
                 renderHistory();
                 updateDatalists();
+                populateSupplierSelect(); // FITUR BARU
                 initOnlineDetection();
                 initDragDrop();
-                loadSettingsToForm(); // Load settings ke form
+                loadSettingsToForm();
+                initSettingsListeners();
+                initLaporanDates(); // FITUR BARU
                 
                 setInterval(() => {
                     const usage = storage.getUsage();
@@ -1009,6 +1313,16 @@
                 
                 if (dateInput) dateInput.value = dateStr;
                 if (timeInput) timeInput.value = timeStr;
+            };
+
+            // FITUR BARU: Inisialisasi tanggal laporan
+            const initLaporanDates = () => {
+                const today = new Date().toISOString().split('T')[0];
+                const startOfMonth = new Date();
+                startOfMonth.setDate(1);
+                
+                document.getElementById('laporan-start').value = startOfMonth.toISOString().split('T')[0];
+                document.getElementById('laporan-end').value = today;
             };
 
             const switchTab = (tabName, clickedBtn) => {
@@ -1041,9 +1355,389 @@
                     renderRecent();
                 } else if (tabName === 'pengaturan') {
                     loadSettingsToForm();
+                } else if (tabName === 'supplier') { // FITUR BARU
+                    renderSupplierList();
+                } else if (tabName === 'laporan') { // FITUR BARU
+                    generateLaporan();
                 }
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            // ==========================================
+            // SUPPLIER DATABASE FUNCTIONS - FITUR BARU
+            // ==========================================
+            
+            const populateSupplierSelect = () => {
+                const select = document.getElementById('inp-supplier');
+                if (!select) return;
+                
+                // Simpan value yang sedang dipilih
+                const currentValue = select.value;
+                
+                // Reset options
+                select.innerHTML = '<option value="">-- Pilih Supplier --</option>';
+                
+                // Urutkan supplier berdasarkan nama
+                const sortedSuppliers = [...state.suppliers].sort((a, b) => 
+                    a.nama.localeCompare(b.nama)
+                );
+                
+                sortedSuppliers.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.nama;
+                    option.textContent = s.nama;
+                    option.dataset.id = s.id;
+                    select.appendChild(option);
+                });
+                
+                // Restore value jika masih ada
+                if (currentValue) {
+                    select.value = currentValue;
+                }
+            };
+
+            const onSupplierChange = () => {
+                const select = document.getElementById('inp-supplier');
+                const selectedName = select.value;
+                const infoDisplay = document.getElementById('supplier-info-display');
+                
+                if (!selectedName) {
+                    infoDisplay.style.display = 'none';
+                    return;
+                }
+                
+                const supplier = state.suppliers.find(s => s.nama === selectedName);
+                if (supplier) {
+                    document.getElementById('disp-bank').textContent = supplier.bank;
+                    document.getElementById('disp-atasnama').textContent = supplier.atasNama;
+                    document.getElementById('disp-rekening').textContent = utils.formatRekening(supplier.rekening);
+                    infoDisplay.style.display = 'block';
+                } else {
+                    infoDisplay.style.display = 'none';
+                }
+            };
+
+            const openSupplierModal = (id = null) => {
+                const modal = document.getElementById('modal-supplier');
+                const title = document.getElementById('supplier-modal-title');
+                const form = document.getElementById('form-supplier');
+                
+                if (id) {
+                    // Edit mode
+                    const s = state.suppliers.find(x => x.id === id);
+                    if (!s) return;
+                    
+                    state.editingSupplierId = id;
+                    title.textContent = 'Edit Supplier';
+                    document.getElementById('supplier-id').value = s.id;
+                    document.getElementById('supplier-nama').value = s.nama;
+                    document.getElementById('supplier-bank').value = s.bank;
+                    document.getElementById('supplier-rekening').value = s.rekening;
+                    document.getElementById('supplier-atasnama').value = s.atasNama;
+                    document.getElementById('supplier-keterangan').value = s.keterangan || '';
+                } else {
+                    // Add mode
+                    state.editingSupplierId = null;
+                    title.textContent = 'Tambah Supplier';
+                    form.reset();
+                    document.getElementById('supplier-id').value = '';
+                }
+                
+                modal.classList.add('active');
+            };
+
+            const closeSupplierModal = () => {
+                document.getElementById('modal-supplier').classList.remove('active');
+                state.editingSupplierId = null;
+            };
+
+            const saveSupplier = (e) => {
+                e.preventDefault();
+                
+                if (state.suppliers.length >= CONFIG.MAX_SUPPLIERS && !state.editingSupplierId) {
+                    ui.showToast(`Batas maksimal ${CONFIG.MAX_SUPPLIERS} supplier tercapai`, 'error');
+                    return false;
+                }
+                
+                const nama = utils.sanitizeInput(document.getElementById('supplier-nama').value, 100);
+                const bank = document.getElementById('supplier-bank').value;
+                const rekening = utils.sanitizeInput(document.getElementById('supplier-rekening').value, 30);
+                const atasNama = utils.sanitizeInput(document.getElementById('supplier-atasnama').value, 100);
+                const keterangan = utils.sanitizeInput(document.getElementById('supplier-keterangan').value, 200);
+                
+                // Cek duplikat nama (kecuali saat edit nama yang sama)
+                const existing = state.suppliers.find(s => 
+                    s.nama.toLowerCase() === nama.toLowerCase() && s.id !== state.editingSupplierId
+                );
+                if (existing) {
+                    ui.showToast('Nama supplier sudah ada', 'error');
+                    return false;
+                }
+                
+                const supplier = {
+                    id: state.editingSupplierId || utils.generateId(),
+                    nama,
+                    bank,
+                    rekening,
+                    atasNama,
+                    keterangan,
+                    createdAt: state.editingSupplierId 
+                        ? state.suppliers.find(s => s.id === state.editingSupplierId)?.createdAt 
+                        : new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                const validation = validator.validateSupplier(supplier);
+                if (!validation.isValid) {
+                    ui.showToast(validation.errors.join(', '), 'error');
+                    return false;
+                }
+                
+                if (state.editingSupplierId) {
+                    const idx = state.suppliers.findIndex(s => s.id === state.editingSupplierId);
+                    if (idx !== -1) {
+                        state.suppliers[idx] = supplier;
+                        ui.showToast('Supplier berhasil diupdate!', 'success');
+                    }
+                } else {
+                    state.suppliers.push(supplier);
+                    ui.showToast('Supplier berhasil ditambahkan!', 'success');
+                }
+                
+                if (storage.saveSuppliers()) {
+                    renderSupplierList();
+                    populateSupplierSelect();
+                    closeSupplierModal();
+                }
+                
+                return false;
+            };
+
+            const renderSupplierList = () => {
+                const container = document.getElementById('supplier-list');
+                const search = utils.sanitizeInput(document.getElementById('supplier-search')?.value || '').toLowerCase();
+                
+                let filtered = state.suppliers;
+                if (search) {
+                    filtered = state.suppliers.filter(s => 
+                        s.nama.toLowerCase().includes(search) ||
+                        s.bank.toLowerCase().includes(search) ||
+                        s.rekening.includes(search) ||
+                        s.atasNama.toLowerCase().includes(search)
+                    );
+                }
+                
+                // Urutkan berdasarkan nama
+                filtered.sort((a, b) => a.nama.localeCompare(b.nama));
+                
+                if (filtered.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty" style="grid-column:1/-1">
+                            <div class="empty-icon">🏢</div>
+                            <div style="font-weight:600;margin-bottom:0.5rem">${search ? 'Tidak ada hasil pencarian' : 'Belum ada data supplier'}</div>
+                            <p style="font-size:0.875rem">${search ? 'Coba kata kunci lain' : 'Tambahkan supplier untuk memudahkan input transaksi'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = filtered.map(s => `
+                    <div class="supplier-card">
+                        <div class="supplier-header">
+                            <div>
+                                <div class="supplier-name">${utils.escapeHtml(s.nama)}</div>
+                                <span class="supplier-bank">${utils.escapeHtml(s.bank)}</span>
+                            </div>
+                        </div>
+                        <div class="supplier-atasnama">
+                            <strong>${utils.escapeHtml(s.atasNama)}</strong>
+                        </div>
+                        <div class="supplier-rek">
+                            Rek: ${utils.formatRekening(s.rekening)}
+                        </div>
+                        ${s.keterangan ? `<div style="margin-top:0.5rem;font-size:0.875rem;color:#64748b">${utils.escapeHtml(s.keterangan)}</div>` : ''}
+                        <div class="supplier-actions">
+                            <button class="btn btn-warning btn-sm" onclick="app.openSupplierModal('${s.id}')">
+                                ✏️ Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="app.deleteSupplier('${s.id}')">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            const deleteSupplier = (id) => {
+                const s = state.suppliers.find(x => x.id === id);
+                if (!s) return;
+                
+                // Cek apakah supplier digunakan di transaksi
+                const usedInTransaksi = state.transactions.some(t => t.supplier === s.nama);
+                if (usedInTransaksi) {
+                    if (!confirm('Supplier ini digunakan di beberapa transaksi. Menghapus akan membuat data transaksi tetap tersimpan tapi tanpa kaitan supplier. Lanjutkan?')) {
+                        return;
+                    }
+                } else {
+                    if (!confirm('Yakin ingin menghapus supplier ini?')) return;
+                }
+                
+                state.suppliers = state.suppliers.filter(s => s.id !== id);
+                
+                if (storage.saveSuppliers()) {
+                    renderSupplierList();
+                    populateSupplierSelect();
+                    ui.showToast('Supplier berhasil dihapus', 'success');
+                }
+            };
+
+            // ==========================================
+            // LAPORAN KEUANGAN FUNCTIONS - FITUR BARU
+            // ==========================================
+            
+            const generateLaporan = () => {
+                const startDate = document.getElementById('laporan-start').value;
+                const endDate = document.getElementById('laporan-end').value;
+                const statusFilter = document.getElementById('laporan-status').value;
+                
+                if (!startDate || !endDate) {
+                    document.getElementById('laporan-content').style.display = 'none';
+                    document.getElementById('laporan-empty').style.display = 'block';
+                    return;
+                }
+                
+                // Filter transaksi
+                let filtered = state.transactions.filter(t => {
+                    const tDate = new Date(t.tanggal);
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    end.setHours(23, 59, 59);
+                    
+                    const inRange = tDate >= start && tDate <= end;
+                    const matchStatus = statusFilter === 'all' || t.status === statusFilter;
+                    
+                    return inRange && matchStatus;
+                });
+                
+                if (filtered.length === 0) {
+                    document.getElementById('laporan-content').style.display = 'none';
+                    document.getElementById('laporan-empty').style.display = 'block';
+                    document.getElementById('laporan-empty').innerHTML = `
+                        <div class="card-body" style="text-align:center;padding:3rem">
+                            <div class="empty-icon">📊</div>
+                            <div style="font-weight:600;margin-bottom:0.5rem">Tidak ada transaksi</div>
+                            <p style="font-size:0.875rem;color:#64748b">Tidak ditemukan transaksi untuk periode dan filter yang dipilih</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Group by supplier
+                const bySupplier = {};
+                filtered.forEach(t => {
+                    if (!bySupplier[t.supplier]) {
+                        bySupplier[t.supplier] = {
+                            transactions: [],
+                            total: 0,
+                            supplierData: state.suppliers.find(s => s.nama === t.supplier)
+                        };
+                    }
+                    bySupplier[t.supplier].transactions.push(t);
+                    bySupplier[t.supplier].total += t.total;
+                });
+                
+                // Render ringkasan
+                const grandTotal = Object.values(bySupplier).reduce((sum, s) => sum + s.total, 0);
+                document.getElementById('laporan-total').textContent = 'Rp ' + utils.formatRupiah(grandTotal);
+                document.getElementById('laporan-count').textContent = filtered.length;
+                document.getElementById('laporan-supplier-count').textContent = Object.keys(bySupplier).length;
+                
+                // Render detail
+                const detailContainer = document.getElementById('laporan-detail');
+                let html = '';
+                
+                Object.entries(bySupplier).sort((a, b) => b[1].total - a[1].total).forEach(([nama, data]) => {
+                    const s = data.supplierData;
+                    const bankInfo = s 
+                        ? `<div class="bank-info">
+                            <strong>${s.bank}</strong> | ${utils.escapeHtml(s.atasNama)}<br>
+                            Rek: ${utils.formatRekening(s.rekening)}
+                           </div>`
+                        : '<div class="bank-info" style="color:#ef4444">⚠️ Data rekening tidak tersedia</div>';
+                    
+                    html += `
+                        <div class="pembayaran-row">
+                            <div class="pembayaran-info">
+                                <div class="pembayaran-nama">${utils.escapeHtml(nama)}</div>
+                                <div class="pembayaran-detail">${data.transactions.length} transaksi</div>
+                                ${bankInfo}
+                            </div>
+                            <div class="pembayaran-jumlah">
+                                Rp ${utils.formatRupiah(data.total)}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                detailContainer.innerHTML = html;
+                
+                // Update printable version
+                document.getElementById('print-periode').textContent = `Periode: ${utils.formatDate(startDate)} s/d ${utils.formatDate(endDate)}`;
+                document.getElementById('print-content').innerHTML = detailContainer.innerHTML;
+                
+                document.getElementById('laporan-content').style.display = 'block';
+                document.getElementById('laporan-empty').style.display = 'none';
+            };
+
+            const resetLaporanFilter = () => {
+                initLaporanDates();
+                document.getElementById('laporan-status').value = 'all';
+                generateLaporan();
+            };
+
+            const exportLaporanCSV = () => {
+                const startDate = document.getElementById('laporan-start').value;
+                const endDate = document.getElementById('laporan-end').value;
+                
+                // Recalculate data
+                let filtered = state.transactions.filter(t => {
+                    const tDate = new Date(t.tanggal);
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    end.setHours(23, 59, 59);
+                    return tDate >= start && tDate <= end;
+                });
+                
+                const bySupplier = {};
+                filtered.forEach(t => {
+                    if (!bySupplier[t.supplier]) {
+                        bySupplier[t.supplier] = {
+                            transactions: [],
+                            total: 0,
+                            supplierData: state.suppliers.find(s => s.nama === t.supplier)
+                        };
+                    }
+                    bySupplier[t.supplier].transactions.push(t);
+                    bySupplier[t.supplier].total += t.total;
+                });
+                
+                const csvData = Object.entries(bySupplier).map(([nama, data]) => {
+                    const s = data.supplierData || {};
+                    return {
+                        supplier: nama,
+                        jumlah_transaksi: data.transactions.length,
+                        total_pembayaran: data.total,
+                        bank: s.bank || '-',
+                        atas_nama: s.atasNama || '-',
+                        no_rekening: s.rekening || '-'
+                    };
+                });
+                
+                const csv = Papa.unparse(csvData);
+                const filename = `laporan_pembayaran_${startDate}_${endDate}.csv`;
+                downloadFile(csv, filename, 'text/csv');
+                ui.showToast('Laporan berhasil diexport!', 'success');
             };
 
             // ==========================================
@@ -1083,7 +1777,7 @@
             const toggleFloorSetting = () => {
                 updatePreview();
                 updateNettoHint();
-                calculateWeight(); // Recalculate dengan setting baru
+                calculateWeight();
             };
 
             const saveSettings = () => {
@@ -1099,7 +1793,7 @@
                 if (storage.saveSettings()) {
                     ui.showToast('Pengaturan berhasil disimpan!', 'success');
                     updatePreview();
-                    calculateWeight(); // Recalculate dengan setting baru
+                    calculateWeight();
                 } else {
                     ui.showToast('Gagal menyimpan pengaturan', 'error');
                 }
@@ -1116,7 +1810,7 @@
             };
 
             // ==========================================
-            // CALCULATION WITH FLOOR OPTION
+            // CALCULATION
             // ==========================================
             
             const calculateWeight = () => {
@@ -1133,12 +1827,10 @@
                         document.getElementById('inp-tara').classList.remove('error');
                     }
                     
-                    // Calculate netto
                     const hasil = Math.max(0, bruto - tara);
                     const potonganKg = (hasil * potonganPersen) / 100;
                     let netto = Math.max(0, hasil - potonganKg);
                     
-                    // APPLY FLOOR SETTING
                     const useFloor = state.settings.useFloor;
                     const decimalPlaces = state.settings.decimalPlaces;
                     
@@ -1151,7 +1843,6 @@
                     const subtotal = netto * harga;
                     const total = subtotal + admin;
                     
-                    // Display dengan format yang sesuai
                     const nettoDisplay = useFloor ? 
                         netto.toString() : 
                         netto.toFixed(decimalPlaces);
@@ -1192,7 +1883,7 @@
                 ui.setLoading(true);
                 
                 try {
-                    if (state.transactions.length >= CONFIG.MAX_TRANSACTIONS) {
+                    if (state.transactions.length >= CONFIG.MAX_TRANSACTIONS && !state.editingId) {
                         ui.showToast(`Batas maksimal ${CONFIG.MAX_TRANSACTIONS} transaksi tercapai. Backup dan hapus data lama.`, 'error');
                         return false;
                     }
@@ -1203,7 +1894,6 @@
                     const hasil = Math.max(0, bruto - tara);
                     let netto = Math.max(0, hasil - ((hasil * potonganPersen) / 100));
                     
-                    // APPLY FLOOR SETTING SAAT SAVE
                     const useFloor = state.settings.useFloor;
                     const decimalPlaces = state.settings.decimalPlaces;
                     
@@ -1217,13 +1907,17 @@
                     const admin = utils.validateNumber(document.getElementById('inp-admin').value, 0, 100000000, 0);
                     const total = (netto * harga) + admin;
                     
+                    const supplierName = document.getElementById('inp-supplier').value;
+                    const supplierData = state.suppliers.find(s => s.nama === supplierName);
+                    
                     const transaction = {
                         id: state.editingId || utils.generateId(),
                         tanggal: document.getElementById('inp-tanggal').value,
                         jam: document.getElementById('inp-jam').value,
                         supir: utils.sanitizeInput(document.getElementById('inp-supir').value),
                         plat: utils.sanitizeInput(document.getElementById('inp-plat').value).toUpperCase(),
-                        supplier: utils.sanitizeInput(document.getElementById('inp-supplier').value),
+                        supplier: supplierName,
+                        supplierId: supplierData?.id || null, // FITUR BARU: Simpan ID supplier
                         bruto: bruto,
                         tara: tara,
                         potonganPersen: potonganPersen,
@@ -1234,15 +1928,16 @@
                         status: document.getElementById('inp-status').value,
                         sisa: document.getElementById('inp-status').value === 'Lunas' ? 0 : 
                               Math.max(0, total - utils.validateNumber(document.getElementById('inp-dibayar')?.value, 0, total, 0)),
-                        useFloor: useFloor, // Simpan setting yang digunakan
+                        useFloor: useFloor,
                         decimalPlaces: decimalPlaces,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: state.editingId ? new Date().toISOString() : undefined
+                        createdAt: state.editingId ? state.transactions.find(t => t.id === state.editingId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
                     };
                     
                     const validation = validator.validateTransaction(transaction);
                     if (!validation.isValid) {
                         ui.showToast(validation.errors.join(', '), 'error');
+                        ui.setLoading(false);
                         return false;
                     }
                     
@@ -1265,7 +1960,7 @@
                         updateDatalists();
                         
                         setTimeout(() => {
-                            if (confirm('Cetak nota sekarang?')) {
+                            if (!state.editingId && confirm('Cetak nota sekarang?')) {
                                 showNota(transaction.id);
                             } else {
                                 resetForm();
@@ -1290,7 +1985,8 @@
                 document.getElementById('inp-potongan').value = '0';
                 document.getElementById('inp-admin').value = '0';
                 document.getElementById('btn-submit').innerHTML = '<span>💾</span> Simpan Transaksi';
-                updateNettoHint(); // Update hint sesuai setting
+                document.getElementById('supplier-info-display').style.display = 'none';
+                updateNettoHint();
                 calculateWeight();
             };
 
@@ -1303,11 +1999,13 @@
                 const totalBerat = state.transactions.reduce((sum, t) => sum + (t.netto || 0), 0);
                 const totalNilai = state.transactions.reduce((sum, t) => sum + (t.total || 0), 0);
                 const pending = state.transactions.filter(t => t.status !== 'Lunas').length;
+                const supplierCount = state.suppliers.length; // FITUR BARU
                 
                 document.getElementById('stat-total').textContent = total.toLocaleString('id-ID');
                 document.getElementById('stat-berat').textContent = totalBerat.toFixed(2);
                 document.getElementById('stat-nilai').textContent = (totalNilai / 1000000).toFixed(1) + 'M';
                 document.getElementById('stat-pending').textContent = pending.toLocaleString('id-ID');
+                document.getElementById('stat-supplier').textContent = supplierCount.toLocaleString('id-ID'); // FITUR BARU
             };
 
             const renderRecent = () => {
@@ -1327,7 +2025,6 @@
                 
                 container.innerHTML = recent.map(t => {
                     const icon = t.status === 'Lunas' ? '✅' : (t.status === 'Dicicil' ? '⏳' : '❌');
-                    // Format netto sesuai setting yang tersimpan di transaksi
                     const nettoDisplay = t.useFloor ? 
                         Math.floor(t.netto) : 
                         t.netto.toFixed(t.decimalPlaces || 2);
@@ -1387,7 +2084,6 @@
                 tbody.innerHTML = paginated.map(t => {
                     const badgeClass = t.status === 'Lunas' ? 'badge-success' : 
                                       (t.status === 'Dicicil' ? 'badge-warning' : 'badge-danger');
-                    // Format netto sesuai setting transaksi
                     const nettoDisplay = t.useFloor ? 
                         Math.floor(t.netto) : 
                         t.netto.toFixed(t.decimalPlaces || 2);
@@ -1404,6 +2100,7 @@
                             <td class="no-print">
                                 <div class="action-btns">
                                     <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();app.showNota('${utils.escapeHtml(t.id)}')" title="Cetak">🖨️</button>
+                                    <button class="btn btn-warning btn-sm" onclick="event.stopPropagation();app.editTransaction('${utils.escapeHtml(t.id)}')" title="Edit">✏️</button>
                                     <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();app.deleteTransaction('${utils.escapeHtml(t.id)}')" title="Hapus">🗑️</button>
                                 </div>
                             </td>
@@ -1448,11 +2145,10 @@
             const updateDatalists = () => {
                 const supirs = [...new Set(state.transactions.map(t => t.supir).filter(Boolean))].slice(0, 50);
                 const plats = [...new Set(state.transactions.map(t => t.plat).filter(Boolean))].slice(0, 50);
-                const suppliers = [...new Set(state.transactions.map(t => t.supplier).filter(Boolean))].slice(0, 50);
                 
                 fillDatalist('list-supir', supirs);
                 fillDatalist('list-plat', plats);
-                fillDatalist('list-supplier', suppliers);
+                // Supplier sekarang menggunakan select, bukan datalist
             };
 
             const fillDatalist = (id, items) => {
@@ -1470,10 +2166,54 @@
                 renderHistory();
             };
 
-            // ==========================================
-            // NOTA WITH CUSTOM ADDRESS
-            // ==========================================
-            
+            const editTransaction = (id) => {
+                const t = state.transactions.find(x => x.id === id);
+                if (!t) {
+                    ui.showToast('Transaksi tidak ditemukan', 'error');
+                    return;
+                }
+                
+                state.editingId = id;
+                
+                document.getElementById('inp-tanggal').value = t.tanggal;
+                document.getElementById('inp-jam').value = t.jam;
+                document.getElementById('inp-supir').value = t.supir;
+                document.getElementById('inp-plat').value = t.plat;
+                document.getElementById('inp-supplier').value = t.supplier;
+                document.getElementById('inp-bruto').value = t.bruto;
+                document.getElementById('inp-tara').value = t.tara;
+                document.getElementById('inp-potongan').value = t.potonganPersen;
+                document.getElementById('inp-harga').value = t.harga;
+                document.getElementById('inp-admin').value = t.admin;
+                document.getElementById('inp-status').value = t.status;
+                
+                // Trigger supplier change untuk menampilkan info rekening
+                onSupplierChange();
+                
+                const groupDibayar = document.getElementById('group-dibayar');
+                const inputDibayar = document.getElementById('inp-dibayar');
+                
+                if (t.status !== 'Lunas') {
+                    groupDibayar.style.display = 'block';
+                    const dibayar = t.total - t.sisa;
+                    inputDibayar.value = dibayar > 0 ? dibayar : '';
+                } else {
+                    groupDibayar.style.display = 'none';
+                    inputDibayar.value = '';
+                }
+                
+                document.getElementById('btn-submit').innerHTML = '<span>💾</span> Update Transaksi';
+                
+                calculateWeight();
+                
+                const inputBtn = document.querySelectorAll('.nav-btn')[1];
+                switchTab('input', inputBtn);
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                ui.showToast('Mode edit aktif - silakan ubah data dan simpan', 'info');
+            };
+
             const showNota = (id) => {
                 const t = state.transactions.find(x => x.id === id);
                 if (!t) {
@@ -1481,11 +2221,9 @@
                     return;
                 }
                 
-                // Gunakan setting yang tersimpan di transaksi, atau setting saat ini
                 const useFloor = t.useFloor !== undefined ? t.useFloor : state.settings.useFloor;
                 const decimalPlaces = t.decimalPlaces !== undefined ? t.decimalPlaces : state.settings.decimalPlaces;
                 
-                // Update header nota dengan setting perusahaan
                 document.getElementById('nota-nama-perusahaan').textContent = state.settings.namaPerusahaan.toUpperCase();
                 document.getElementById('nota-alamat').textContent = state.settings.alamat;
                 document.getElementById('nota-telepon').textContent = state.settings.telepon ? `Telp: ${state.settings.telepon}` : '';
@@ -1499,7 +2237,6 @@
                 document.getElementById('nota-tara').textContent = t.tara.toFixed(2) + ' kg';
                 document.getElementById('nota-potongan').textContent = t.potonganPersen + '%';
                 
-                // Format netto sesuai setting
                 const nettoDisplay = useFloor ? 
                     Math.floor(t.netto) + ' kg' : 
                     t.netto.toFixed(decimalPlaces) + ' kg';
@@ -1609,7 +2346,6 @@
                             const hasil = Math.max(0, bruto - tara);
                             let netto = Math.max(0, hasil - ((hasil * potongan) / 100));
                             
-                            // Apply current floor setting
                             if (state.settings.useFloor) {
                                 netto = Math.floor(netto);
                             } else {
@@ -1707,7 +2443,8 @@
             const backupJSON = () => {
                 const payload = {
                     data: state.transactions,
-                    settings: state.settings, // Include settings in backup
+                    suppliers: state.suppliers, // FITUR BARU: Include suppliers
+                    settings: state.settings,
                     version: CONFIG.VERSION,
                     exportedAt: new Date().toISOString(),
                     checksum: utils.calculateChecksum(state.transactions)
@@ -1753,7 +2490,15 @@
                         if (confirm(`Restore ${restored.length} transaksi? Data akan digabungkan dengan data existing.`)) {
                             state.transactions = [...restored, ...state.transactions].slice(0, CONFIG.MAX_TRANSACTIONS);
                             
-                            // Restore settings if available
+                            // Restore suppliers jika ada
+                            if (payload.suppliers && Array.isArray(payload.suppliers)) {
+                                const existingNames = new Set(state.suppliers.map(s => s.nama.toLowerCase()));
+                                const newSuppliers = payload.suppliers.filter(s => !existingNames.has(s.nama.toLowerCase()));
+                                state.suppliers = [...state.suppliers, ...newSuppliers].slice(0, CONFIG.MAX_SUPPLIERS);
+                                storage.saveSuppliers();
+                                populateSupplierSelect();
+                            }
+                            
                             if (payload.settings) {
                                 state.settings = { ...DEFAULT_SETTINGS, ...payload.settings };
                                 storage.saveSettings();
@@ -1844,7 +2589,6 @@
                 }, false);
             };
 
-            // Live preview untuk settings
             const initSettingsListeners = () => {
                 ['setting-nama', 'setting-alamat', 'setting-telepon'].forEach(id => {
                     const el = document.getElementById(id);
@@ -1869,6 +2613,7 @@
                 showNota,
                 closeNota,
                 deleteTransaction,
+                editTransaction,
                 changePage,
                 importCSV,
                 processImport,
@@ -1877,10 +2622,20 @@
                 downloadTemplate,
                 backupJSON,
                 restoreJSON,
-                // Settings
                 saveSettings,
                 resetSettings,
                 toggleFloorSetting,
+                // FITUR BARU: Supplier API
+                openSupplierModal,
+                closeSupplierModal,
+                saveSupplier,
+                deleteSupplier,
+                renderSupplierList,
+                onSupplierChange,
+                // FITUR BARU: Laporan API
+                generateLaporan,
+                resetLaporanFilter,
+                exportLaporanCSV,
                 // Expose for debugging
                 _state: () => state,
                 _config: CONFIG
