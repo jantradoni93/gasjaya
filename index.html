@@ -43,6 +43,7 @@
         .btn-outline{border:1px solid var(--border);background:#fff;color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
         .btn-sm{padding:0.375rem 0.75rem;font-size:0.875rem;min-height:36px}
         .btn-lg{padding:0.75rem 1.5rem;font-size:1rem}
+        .btn-secondary{background:#64748b;color:#fff}.btn-secondary:hover{background:#475569}
         .calc-box{background:#f0f9ff;border:1px solid #e0f2fe;border-radius:0.5rem;padding:1rem;margin:1rem 0}
         .calc-row{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px dashed #cbd5e1}
         .calc-row:last-child{border:none;font-weight:700;color:var(--primary);font-size:1.125rem;border-top:2px solid #bfdbfe;margin-top:0.5rem;padding-top:0.5rem}
@@ -96,6 +97,10 @@
         .page-btn:hover{border-color:var(--primary)}
         .page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
         .page-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .settings-group{background:#f8fafc;border:1px solid var(--border);border-radius:0.5rem;padding:1rem;margin-bottom:1rem}
+        .settings-title{font-size:0.875rem;font-weight:600;color:#64748b;margin-bottom:0.75rem;text-transform:uppercase}
+        .checkbox-wrapper{display:flex;align-items:center;gap:0.5rem;cursor:pointer}
+        .checkbox-wrapper input[type="checkbox"]{width:18px;height:18px;cursor:pointer}
         @media print{@page{size:80mm 297mm;margin:0}body *{visibility:hidden}.nota,.nota *{visibility:visible}.nota{position:absolute;left:0;top:0;width:80mm;padding:5mm}.no-print{display:none!important}}
     </style>
 <base target="_blank">
@@ -142,6 +147,9 @@
                 </button>
                 <button class="nav-btn" onclick="app.switchTab('data', this)" aria-label="Manajemen Data">
                     <span>💾</span> Data
+                </button>
+                <button class="nav-btn" onclick="app.switchTab('pengaturan', this)" aria-label="Pengaturan">
+                    <span>⚙️</span> Pengaturan
                 </button>
             </nav>
         </div>
@@ -264,6 +272,7 @@
                                         <input type="text" class="form-input" id="inp-netto" readonly style="font-weight:700;color:var(--primary);font-size:1.125rem" aria-live="polite">
                                         <span class="input-suffix">kg</span>
                                     </div>
+                                    <small id="netto-hint" style="color:#64748b;font-size:0.75rem;display:none">Dibulatkan kebawah (floor)</small>
                                 </div>
                             </div>
                         </div>
@@ -482,6 +491,86 @@
                 </div>
             </div>
         </section>
+
+        <!-- PENGATURAN BARU -->
+        <section id="pengaturan" class="tab-content" style="display:none" aria-label="Pengaturan">
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                        <span>⚙️</span> Pengaturan Nota & Perhitungan
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <!-- Pengaturan Alamat -->
+                    <div class="settings-group">
+                        <div class="settings-title">📍 Informasi Timbangan</div>
+                        <div class="form-grid">
+                            <div class="form-group span-2">
+                                <label class="form-label" for="setting-nama">Nama Perusahaan</label>
+                                <input type="text" class="form-input" id="setting-nama" placeholder="Timbangan Gas Jaya" maxlength="100">
+                            </div>
+                            <div class="form-group span-2">
+                                <label class="form-label" for="setting-alamat">Alamat Lengkap</label>
+                                <textarea class="form-input" id="setting-alamat" rows="2" placeholder="Jl. Industri No. 123, Jakarta" maxlength="200" style="resize:vertical;min-height:60px"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="setting-telepon">Telepon</label>
+                                <input type="text" class="form-input" id="setting-telepon" placeholder="021-1234567" maxlength="20">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="setting-kota">Kota</label>
+                                <input type="text" class="form-input" id="setting-kota" placeholder="Jakarta" maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pengaturan Perhitungan -->
+                    <div class="settings-group">
+                        <div class="settings-title">⚖️ Pengaturan Perhitungan</div>
+                        <div class="form-group" style="margin-bottom:1rem">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" id="setting-floor" onchange="app.toggleFloorSetting()">
+                                <span>Pembulatan Berat Bersih ke Bawah (Floor)</span>
+                            </label>
+                            <p style="font-size:0.75rem;color:#64748b;margin-left:26px;margin-top:0.25rem">
+                                Jika diaktifkan: 1234.99 kg → 1234 kg (tanpa desimal)
+                            </p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="setting-desimal">Jumlah Desimal Netto (jika floor tidak aktif)</label>
+                            <select class="form-select" id="setting-desimal" style="width:150px">
+                                <option value="2">2 desimal (1.23)</option>
+                                <option value="1">1 desimal (1.2)</option>
+                                <option value="0">0 desimal (1)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Preview Nota -->
+                    <div class="settings-group">
+                        <div class="settings-title">👁️ Preview Nota</div>
+                        <div id="preview-nota-settings" style="background:#f8fafc;border:1px solid var(--border);border-radius:0.5rem;padding:1rem;font-family:'Courier New',monospace;font-size:12px;line-height:1.4">
+                            <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:0.5rem;margin-bottom:0.5rem">
+                                <div style="font-size:16px;font-weight:bold" id="preview-nama">TIMBANGAN GAS JAYA</div>
+                                <div style="font-size:10px" id="preview-alamat">Jl. Industri No. 123, Jakarta</div>
+                                <div style="font-size:10px" id="preview-telepon">Telp: 021-1234567</div>
+                            </div>
+                            <div style="color:#666;text-align:center;font-size:10px">[Preview header nota]</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+                        <button class="btn btn-primary btn-lg" onclick="app.saveSettings()" style="flex:1">
+                            <span>💾</span> Simpan Pengaturan
+                        </button>
+                        <button class="btn btn-outline btn-lg" onclick="app.resetSettings()" style="flex:1">
+                            <span>↺</span> Reset Default
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Modal Nota -->
@@ -496,9 +585,9 @@
             <div class="modal-body">
                 <div id="nota-content" class="nota">
                     <div class="nota-header">
-                        <div class="nota-title">TIMBANGAN GAS JAYA</div>
-                        <div style="font-size:10px">Jl. Industri No. 123, Jakarta</div>
-                        <div style="font-size:10px">Telp: 021-1234567</div>
+                        <div class="nota-title" id="nota-nama-perusahaan">TIMBANGAN GAS JAYA</div>
+                        <div style="font-size:10px" id="nota-alamat">Jl. Industri No. 123, Jakarta</div>
+                        <div style="font-size:10px" id="nota-telepon">Telp: 021-1234567</div>
                     </div>
                     
                     <div class="nota-row"><span>No:</span><span id="nota-no">-</span></div>
@@ -545,8 +634,8 @@
     <!-- JavaScript -->
     <script>
         /**
-         * Timbangan Gas Jaya - Stabilized Version
-         * Features: Namespace pattern, input validation, error handling, pagination, debounce
+         * Timbangan Gas Jaya - Stabilized Version with Settings
+         * Features: Editable nota address, floor rounding for netto
          */
         
         const app = (function() {
@@ -557,12 +646,22 @@
             // ==========================================
             const CONFIG = {
                 STORAGE_KEY: 'gasjaya_data_v2',
+                STORAGE_SETTINGS: 'gasjaya_settings_v2',
                 STORAGE_META: 'gasjaya_meta_v2',
                 MAX_TRANSACTIONS: 5000,
                 ITEMS_PER_PAGE: 50,
                 MAX_INPUT_LENGTH: 100,
                 DEBOUNCE_DELAY: 300,
-                VERSION: '2.0.0'
+                VERSION: '2.1.0'
+            };
+
+            const DEFAULT_SETTINGS = {
+                namaPerusahaan: 'TIMBANGAN GAS JAYA',
+                alamat: 'Jl. Industri No. 123, Jakarta',
+                telepon: '021-1234567',
+                kota: 'Jakarta',
+                useFloor: false,
+                decimalPlaces: 2
             };
 
             // ==========================================
@@ -574,16 +673,13 @@
                 editingId: null,
                 currentPage: 1,
                 isProcessing: false,
-                lastBackup: null
+                settings: { ...DEFAULT_SETTINGS }
             };
 
             // ==========================================
             // UTILITY FUNCTIONS
             // ==========================================
             const utils = {
-                /**
-                 * Generate unique ID dengan timestamp + random + counter
-                 */
                 generateId: (() => {
                     let counter = 0;
                     return () => {
@@ -594,17 +690,11 @@
                     };
                 })(),
 
-                /**
-                 * Format number ke Rupiah
-                 */
                 formatRupiah: (num) => {
                     if (num === null || num === undefined || isNaN(num)) return '0';
                     return new Intl.NumberFormat('id-ID').format(Math.floor(num));
                 },
 
-                /**
-                 * Format tanggal ke Indonesia
-                 */
                 formatDate: (dateStr) => {
                     if (!dateStr) return '-';
                     try {
@@ -620,9 +710,6 @@
                     }
                 },
 
-                /**
-                 * Escape HTML untuk mencegah XSS
-                 */
                 escapeHtml: (text) => {
                     if (!text) return '';
                     const div = document.createElement('div');
@@ -630,17 +717,11 @@
                     return div.innerHTML;
                 },
 
-                /**
-                 * Sanitize input text
-                 */
                 sanitizeInput: (text, maxLength = CONFIG.MAX_INPUT_LENGTH) => {
                     if (!text) return '';
                     return String(text).trim().slice(0, maxLength);
                 },
 
-                /**
-                 * Validate number dalam range
-                 */
                 validateNumber: (value, min = 0, max = Infinity, decimals = 2) => {
                     const num = parseFloat(value);
                     if (isNaN(num)) return min;
@@ -649,9 +730,18 @@
                     return Number(num.toFixed(decimals));
                 },
 
-                /**
-                 * Debounce function
-                 */
+                // FLOOR / PEMBULATAN KEBAWAH
+                floorNumber: (value) => {
+                    return Math.floor(parseFloat(value) || 0);
+                },
+
+                formatNetto: (value, useFloor, decimalPlaces) => {
+                    if (useFloor) {
+                        return Math.floor(value).toString();
+                    }
+                    return value.toFixed(decimalPlaces);
+                },
+
                 debounce: (func, wait) => {
                     let timeout;
                     return function executedFunction(...args) {
@@ -664,9 +754,6 @@
                     };
                 },
 
-                /**
-                 * Calculate checksum sederhana untuk integritas
-                 */
                 calculateChecksum: (data) => {
                     const str = JSON.stringify(data);
                     let hash = 0;
@@ -680,24 +767,19 @@
             };
 
             // ==========================================
-            // STORAGE MANAGEMENT (dengan error handling)
+            // STORAGE MANAGEMENT
             // ==========================================
             const storage = {
-                /**
-                 * Save data dengan error handling dan size check
-                 */
                 save: () => {
                     try {
-                        // Check storage quota
                         const dataStr = JSON.stringify(state.transactions);
                         const sizeInMB = (dataStr.length * 2) / (1024 * 1024);
                         
-                        if (sizeInMB > 4.5) { // LocalStorage limit ~5MB
+                        if (sizeInMB > 4.5) {
                             ui.showToast('Storage hampir penuh! Silakan backup dan hapus data lama.', 'warning');
                             return false;
                         }
 
-                        // Save dengan metadata
                         const payload = {
                             data: state.transactions,
                             checksum: utils.calculateChecksum(state.transactions),
@@ -707,8 +789,6 @@
                         };
 
                         localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(payload));
-                        
-                        // Update meta
                         localStorage.setItem(CONFIG.STORAGE_META, JSON.stringify({
                             lastUpdate: new Date().toISOString(),
                             count: state.transactions.length
@@ -726,9 +806,6 @@
                     }
                 },
 
-                /**
-                 * Load data dengan validasi integritas
-                 */
                 load: () => {
                     try {
                         const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
@@ -739,12 +816,10 @@
 
                         const payload = JSON.parse(stored);
                         
-                        // Validasi struktur
                         if (!payload || !Array.isArray(payload.data)) {
                             throw new Error('Format data tidak valid');
                         }
 
-                        // Optional: Verify checksum
                         if (payload.checksum) {
                             const currentChecksum = utils.calculateChecksum(payload.data);
                             if (currentChecksum !== payload.checksum) {
@@ -762,9 +837,30 @@
                     }
                 },
 
-                /**
-                 * Check storage usage
-                 */
+                // SETTINGS STORAGE
+                saveSettings: () => {
+                    try {
+                        localStorage.setItem(CONFIG.STORAGE_SETTINGS, JSON.stringify(state.settings));
+                        return true;
+                    } catch (e) {
+                        console.error('Settings save error:', e);
+                        return false;
+                    }
+                },
+
+                loadSettings: () => {
+                    try {
+                        const stored = localStorage.getItem(CONFIG.STORAGE_SETTINGS);
+                        if (stored) {
+                            const loaded = JSON.parse(stored);
+                            state.settings = { ...DEFAULT_SETTINGS, ...loaded };
+                        }
+                    } catch (e) {
+                        console.error('Settings load error:', e);
+                        state.settings = { ...DEFAULT_SETTINGS };
+                    }
+                },
+
                 getUsage: () => {
                     try {
                         let total = 0;
@@ -784,9 +880,6 @@
             // UI FUNCTIONS
             // ==========================================
             const ui = {
-                /**
-                 * Show toast notification
-                 */
                 showToast: (message, type = 'success', duration = 3000) => {
                     const toast = document.getElementById('toast');
                     const title = document.getElementById('toast-title');
@@ -808,9 +901,6 @@
                     }, duration);
                 },
 
-                /**
-                 * Show/hide loading
-                 */
                 setLoading: (show) => {
                     const el = document.getElementById('loading');
                     if (show) el.classList.add('active');
@@ -818,9 +908,6 @@
                     state.isProcessing = show;
                 },
 
-                /**
-                 * Update connection status
-                 */
                 updateConnectionStatus: () => {
                     const isOnline = navigator.onLine;
                     const statusEl = document.getElementById('conn-status');
@@ -840,9 +927,6 @@
             // VALIDATION
             // ==========================================
             const validator = {
-                /**
-                 * Validasi transaksi lengkap
-                 */
                 validateTransaction: (t) => {
                     const errors = [];
                     
@@ -893,13 +977,11 @@
             // CORE FUNCTIONS
             // ==========================================
             
-            /**
-             * Initialize application
-             */
             const init = () => {
                 console.log(`Gas Jaya App v${CONFIG.VERSION} Loaded`);
                 
                 storage.load();
+                storage.loadSettings(); // Load settings
                 initDateTime();
                 updateStats();
                 renderRecent();
@@ -907,8 +989,8 @@
                 updateDatalists();
                 initOnlineDetection();
                 initDragDrop();
+                loadSettingsToForm(); // Load settings ke form
                 
-                // Check storage usage periodically
                 setInterval(() => {
                     const usage = storage.getUsage();
                     if (parseFloat(usage) > 4) {
@@ -917,9 +999,6 @@
                 }, 60000);
             };
 
-            /**
-             * Initialize date/time inputs
-             */
             const initDateTime = () => {
                 const now = new Date();
                 const dateStr = now.toISOString().split('T')[0];
@@ -932,24 +1011,18 @@
                 if (timeInput) timeInput.value = timeStr;
             };
 
-            /**
-             * Switch tab dengan proper cleanup
-             */
             const switchTab = (tabName, clickedBtn) => {
-                // Hide all tabs
                 document.querySelectorAll('.tab-content').forEach(tab => {
                     tab.style.display = 'none';
                     tab.setAttribute('aria-hidden', 'true');
                 });
                 
-                // Show selected
                 const selected = document.getElementById(tabName);
                 if (selected) {
                     selected.style.display = 'block';
                     selected.setAttribute('aria-hidden', 'false');
                 }
                 
-                // Update nav buttons
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.classList.remove('active');
                     btn.setAttribute('aria-current', 'false');
@@ -960,21 +1033,92 @@
                     clickedBtn.setAttribute('aria-current', 'page');
                 }
                 
-                // Refresh data
                 if (tabName === 'riwayat') {
                     state.currentPage = 1;
                     renderHistory();
                 } else if (tabName === 'dashboard') {
                     updateStats();
                     renderRecent();
+                } else if (tabName === 'pengaturan') {
+                    loadSettingsToForm();
                 }
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
-            /**
-             * Calculate weight dan financial
-             */
+            // ==========================================
+            // SETTINGS FUNCTIONS
+            // ==========================================
+            
+            const loadSettingsToForm = () => {
+                document.getElementById('setting-nama').value = state.settings.namaPerusahaan;
+                document.getElementById('setting-alamat').value = state.settings.alamat;
+                document.getElementById('setting-telepon').value = state.settings.telepon;
+                document.getElementById('setting-kota').value = state.settings.kota;
+                document.getElementById('setting-floor').checked = state.settings.useFloor;
+                document.getElementById('setting-desimal').value = state.settings.decimalPlaces;
+                
+                updatePreview();
+                updateNettoHint();
+            };
+
+            const updatePreview = () => {
+                const nama = document.getElementById('setting-nama').value || DEFAULT_SETTINGS.namaPerusahaan;
+                const alamat = document.getElementById('setting-alamat').value || DEFAULT_SETTINGS.alamat;
+                const telepon = document.getElementById('setting-telepon').value || DEFAULT_SETTINGS.telepon;
+                
+                document.getElementById('preview-nama').textContent = nama.toUpperCase();
+                document.getElementById('preview-alamat').textContent = alamat;
+                document.getElementById('preview-telepon').textContent = telepon ? `Telp: ${telepon}` : '';
+            };
+
+            const updateNettoHint = () => {
+                const useFloor = document.getElementById('setting-floor').checked;
+                const hint = document.getElementById('netto-hint');
+                if (hint) {
+                    hint.style.display = useFloor ? 'block' : 'none';
+                }
+            };
+
+            const toggleFloorSetting = () => {
+                updatePreview();
+                updateNettoHint();
+                calculateWeight(); // Recalculate dengan setting baru
+            };
+
+            const saveSettings = () => {
+                state.settings = {
+                    namaPerusahaan: utils.sanitizeInput(document.getElementById('setting-nama').value, 100) || DEFAULT_SETTINGS.namaPerusahaan,
+                    alamat: utils.sanitizeInput(document.getElementById('setting-alamat').value, 200) || DEFAULT_SETTINGS.alamat,
+                    telepon: utils.sanitizeInput(document.getElementById('setting-telepon').value, 20) || DEFAULT_SETTINGS.telepon,
+                    kota: utils.sanitizeInput(document.getElementById('setting-kota').value, 50) || DEFAULT_SETTINGS.kota,
+                    useFloor: document.getElementById('setting-floor').checked,
+                    decimalPlaces: parseInt(document.getElementById('setting-desimal').value) || 2
+                };
+
+                if (storage.saveSettings()) {
+                    ui.showToast('Pengaturan berhasil disimpan!', 'success');
+                    updatePreview();
+                    calculateWeight(); // Recalculate dengan setting baru
+                } else {
+                    ui.showToast('Gagal menyimpan pengaturan', 'error');
+                }
+            };
+
+            const resetSettings = () => {
+                if (confirm('Reset ke pengaturan default?')) {
+                    state.settings = { ...DEFAULT_SETTINGS };
+                    storage.saveSettings();
+                    loadSettingsToForm();
+                    ui.showToast('Pengaturan direset ke default', 'success');
+                    calculateWeight();
+                }
+            };
+
+            // ==========================================
+            // CALCULATION WITH FLOOR OPTION
+            // ==========================================
+            
             const calculateWeight = () => {
                 try {
                     const bruto = utils.validateNumber(document.getElementById('inp-bruto').value, 0, 100000, 2);
@@ -983,28 +1127,40 @@
                     const harga = utils.validateNumber(document.getElementById('inp-harga').value, 0, 1000000000, 0);
                     const admin = utils.validateNumber(document.getElementById('inp-admin').value, 0, 100000000, 0);
                     
-                    // Validasi logic
                     if (tara > bruto) {
                         document.getElementById('inp-tara').classList.add('error');
                     } else {
                         document.getElementById('inp-tara').classList.remove('error');
                     }
                     
-                    // Calculate
+                    // Calculate netto
                     const hasil = Math.max(0, bruto - tara);
                     const potonganKg = (hasil * potonganPersen) / 100;
-                    const netto = Math.max(0, hasil - potonganKg);
+                    let netto = Math.max(0, hasil - potonganKg);
+                    
+                    // APPLY FLOOR SETTING
+                    const useFloor = state.settings.useFloor;
+                    const decimalPlaces = state.settings.decimalPlaces;
+                    
+                    if (useFloor) {
+                        netto = Math.floor(netto);
+                    } else {
+                        netto = parseFloat(netto.toFixed(decimalPlaces));
+                    }
                     
                     const subtotal = netto * harga;
                     const total = subtotal + admin;
                     
-                    // Update display
-                    document.getElementById('inp-netto').value = netto.toFixed(2);
+                    // Display dengan format yang sesuai
+                    const nettoDisplay = useFloor ? 
+                        netto.toString() : 
+                        netto.toFixed(decimalPlaces);
+                    
+                    document.getElementById('inp-netto').value = nettoDisplay;
                     document.getElementById('calc-subtotal').textContent = utils.formatRupiah(subtotal);
                     document.getElementById('calc-admin').textContent = utils.formatRupiah(admin);
                     document.getElementById('calc-total').textContent = utils.formatRupiah(total);
                     
-                    // Payment status
                     const status = document.getElementById('inp-status').value;
                     const groupDibayar = document.getElementById('group-dibayar');
                     const inputDibayar = document.getElementById('inp-dibayar');
@@ -1025,9 +1181,10 @@
                 }
             };
 
-            /**
-             * Save transaction dengan validasi lengkap
-             */
+            // ==========================================
+            // SAVE TRANSACTION
+            // ==========================================
+            
             const saveTransaction = (e) => {
                 e.preventDefault();
                 
@@ -1035,18 +1192,27 @@
                 ui.setLoading(true);
                 
                 try {
-                    // Check limit
                     if (state.transactions.length >= CONFIG.MAX_TRANSACTIONS) {
                         ui.showToast(`Batas maksimal ${CONFIG.MAX_TRANSACTIONS} transaksi tercapai. Backup dan hapus data lama.`, 'error');
                         return false;
                     }
                     
-                    // Collect data
                     const bruto = utils.validateNumber(document.getElementById('inp-bruto').value, 0, 100000, 2);
                     const tara = utils.validateNumber(document.getElementById('inp-tara').value, 0, 100000, 2);
                     const potonganPersen = utils.validateNumber(document.getElementById('inp-potongan').value, 0, 100, 2);
                     const hasil = Math.max(0, bruto - tara);
-                    const netto = Math.max(0, hasil - ((hasil * potonganPersen) / 100));
+                    let netto = Math.max(0, hasil - ((hasil * potonganPersen) / 100));
+                    
+                    // APPLY FLOOR SETTING SAAT SAVE
+                    const useFloor = state.settings.useFloor;
+                    const decimalPlaces = state.settings.decimalPlaces;
+                    
+                    if (useFloor) {
+                        netto = Math.floor(netto);
+                    } else {
+                        netto = parseFloat(netto.toFixed(decimalPlaces));
+                    }
+                    
                     const harga = utils.validateNumber(document.getElementById('inp-harga').value, 0, 1000000000, 0);
                     const admin = utils.validateNumber(document.getElementById('inp-admin').value, 0, 100000000, 0);
                     const total = (netto * harga) + admin;
@@ -1068,18 +1234,18 @@
                         status: document.getElementById('inp-status').value,
                         sisa: document.getElementById('inp-status').value === 'Lunas' ? 0 : 
                               Math.max(0, total - utils.validateNumber(document.getElementById('inp-dibayar')?.value, 0, total, 0)),
+                        useFloor: useFloor, // Simpan setting yang digunakan
+                        decimalPlaces: decimalPlaces,
                         createdAt: new Date().toISOString(),
                         updatedAt: state.editingId ? new Date().toISOString() : undefined
                     };
                     
-                    // Validasi
                     const validation = validator.validateTransaction(transaction);
                     if (!validation.isValid) {
                         ui.showToast(validation.errors.join(', '), 'error');
                         return false;
                     }
                     
-                    // Save
                     if (state.editingId) {
                         const idx = state.transactions.findIndex(t => t.id === state.editingId);
                         if (idx !== -1) {
@@ -1098,7 +1264,6 @@
                         renderHistory();
                         updateDatalists();
                         
-                        // Ask to print
                         setTimeout(() => {
                             if (confirm('Cetak nota sekarang?')) {
                                 showNota(transaction.id);
@@ -1118,9 +1283,6 @@
                 return false;
             };
 
-            /**
-             * Reset form
-             */
             const resetForm = () => {
                 document.getElementById('form-transaksi').reset();
                 state.editingId = null;
@@ -1128,12 +1290,14 @@
                 document.getElementById('inp-potongan').value = '0';
                 document.getElementById('inp-admin').value = '0';
                 document.getElementById('btn-submit').innerHTML = '<span>💾</span> Simpan Transaksi';
+                updateNettoHint(); // Update hint sesuai setting
                 calculateWeight();
             };
 
-            /**
-             * Update statistics
-             */
+            // ==========================================
+            // DISPLAY FUNCTIONS
+            // ==========================================
+            
             const updateStats = () => {
                 const total = state.transactions.length;
                 const totalBerat = state.transactions.reduce((sum, t) => sum + (t.netto || 0), 0);
@@ -1146,9 +1310,6 @@
                 document.getElementById('stat-pending').textContent = pending.toLocaleString('id-ID');
             };
 
-            /**
-             * Render recent transactions
-             */
             const renderRecent = () => {
                 const container = document.getElementById('recent-list');
                 const recent = state.transactions.slice(0, 5);
@@ -1166,6 +1327,11 @@
                 
                 container.innerHTML = recent.map(t => {
                     const icon = t.status === 'Lunas' ? '✅' : (t.status === 'Dicicil' ? '⏳' : '❌');
+                    // Format netto sesuai setting yang tersimpan di transaksi
+                    const nettoDisplay = t.useFloor ? 
+                        Math.floor(t.netto) : 
+                        t.netto.toFixed(t.decimalPlaces || 2);
+                    
                     return `
                         <div class="recent-item" onclick="app.showNota('${utils.escapeHtml(t.id)}')">
                             <div class="recent-icon">${icon}</div>
@@ -1175,23 +1341,19 @@
                             </div>
                             <div style="text-align:right">
                                 <div style="font-weight:600">Rp ${utils.formatRupiah(t.total)}</div>
-                                <div style="font-size:0.75rem;color:#64748b">${t.netto.toFixed(2)} kg</div>
+                                <div style="font-size:0.75rem;color:#64748b">${nettoDisplay} kg</div>
                             </div>
                         </div>
                     `;
                 }).join('');
             };
 
-            /**
-             * Render history dengan pagination
-             */
             const renderHistory = () => {
                 const tbody = document.getElementById('tbody-riwayat');
                 const search = utils.sanitizeInput(document.getElementById('filter-search')?.value || '', 50).toLowerCase();
                 const statusFilter = document.getElementById('filter-status')?.value || '';
                 const tanggalFilter = document.getElementById('filter-tanggal')?.value || '';
                 
-                // Filter
                 let filtered = state.transactions.filter(t => {
                     const matchSearch = !search || 
                         (t.supir?.toLowerCase().includes(search)) ||
@@ -1202,7 +1364,6 @@
                     return matchSearch && matchStatus && matchTanggal;
                 });
                 
-                // Pagination
                 const totalPages = Math.ceil(filtered.length / CONFIG.ITEMS_PER_PAGE);
                 const start = (state.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
                 const paginated = filtered.slice(start, start + CONFIG.ITEMS_PER_PAGE);
@@ -1226,13 +1387,18 @@
                 tbody.innerHTML = paginated.map(t => {
                     const badgeClass = t.status === 'Lunas' ? 'badge-success' : 
                                       (t.status === 'Dicicil' ? 'badge-warning' : 'badge-danger');
+                    // Format netto sesuai setting transaksi
+                    const nettoDisplay = t.useFloor ? 
+                        Math.floor(t.netto) : 
+                        t.netto.toFixed(t.decimalPlaces || 2);
+                    
                     return `
                         <tr>
                             <td>${utils.formatDate(t.tanggal)}<br><small style="color:#64748b">${utils.escapeHtml(t.jam)}</small></td>
                             <td>${utils.escapeHtml(t.supir)}</td>
                             <td>${utils.escapeHtml(t.plat)}</td>
                             <td>${utils.escapeHtml(t.supplier)}</td>
-                            <td>${t.netto.toFixed(2)} kg</td>
+                            <td>${nettoDisplay} kg</td>
                             <td>Rp ${utils.formatRupiah(t.total)}</td>
                             <td><span class="badge ${badgeClass}">${utils.escapeHtml(t.status)}</span></td>
                             <td class="no-print">
@@ -1248,9 +1414,6 @@
                 renderPagination(totalPages, filtered.length);
             };
 
-            /**
-             * Render pagination controls
-             */
             const renderPagination = (totalPages, totalItems) => {
                 const container = document.getElementById('pagination');
                 if (totalPages <= 1) {
@@ -1260,10 +1423,8 @@
                 
                 let html = `<span style="color:#64748b;font-size:0.875rem">Total: ${totalItems} | Halaman ${state.currentPage} dari ${totalPages}</span><div style="display:flex;gap:0.25rem">`;
                 
-                // Prev
                 html += `<button class="page-btn" onclick="app.changePage(${state.currentPage - 1})" ${state.currentPage === 1 ? 'disabled' : ''}>←</button>`;
                 
-                // Page numbers (simplified)
                 const startPage = Math.max(1, state.currentPage - 2);
                 const endPage = Math.min(totalPages, startPage + 4);
                 
@@ -1271,29 +1432,19 @@
                     html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="app.changePage(${i})">${i}</button>`;
                 }
                 
-                // Next
                 html += `<button class="page-btn" onclick="app.changePage(${state.currentPage + 1})" ${state.currentPage === totalPages ? 'disabled' : ''}>→</button></div>`;
                 
                 container.innerHTML = html;
             };
 
-            /**
-             * Change page
-             */
             const changePage = (page) => {
                 state.currentPage = page;
                 renderHistory();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
-            /**
-             * Debounced render untuk search
-             */
             const debounceRender = utils.debounce(renderHistory, CONFIG.DEBOUNCE_DELAY);
 
-            /**
-             * Update datalists
-             */
             const updateDatalists = () => {
                 const supirs = [...new Set(state.transactions.map(t => t.supir).filter(Boolean))].slice(0, 50);
                 const plats = [...new Set(state.transactions.map(t => t.plat).filter(Boolean))].slice(0, 50);
@@ -1311,9 +1462,6 @@
                 }
             };
 
-            /**
-             * Clear filters
-             */
             const clearFilter = () => {
                 document.getElementById('filter-search').value = '';
                 document.getElementById('filter-status').value = '';
@@ -1322,15 +1470,25 @@
                 renderHistory();
             };
 
-            /**
-             * Show nota modal
-             */
+            // ==========================================
+            // NOTA WITH CUSTOM ADDRESS
+            // ==========================================
+            
             const showNota = (id) => {
                 const t = state.transactions.find(x => x.id === id);
                 if (!t) {
                     ui.showToast('Transaksi tidak ditemukan', 'error');
                     return;
                 }
+                
+                // Gunakan setting yang tersimpan di transaksi, atau setting saat ini
+                const useFloor = t.useFloor !== undefined ? t.useFloor : state.settings.useFloor;
+                const decimalPlaces = t.decimalPlaces !== undefined ? t.decimalPlaces : state.settings.decimalPlaces;
+                
+                // Update header nota dengan setting perusahaan
+                document.getElementById('nota-nama-perusahaan').textContent = state.settings.namaPerusahaan.toUpperCase();
+                document.getElementById('nota-alamat').textContent = state.settings.alamat;
+                document.getElementById('nota-telepon').textContent = state.settings.telepon ? `Telp: ${state.settings.telepon}` : '';
                 
                 document.getElementById('nota-no').textContent = 'TRX-' + String(t.id).slice(-12);
                 document.getElementById('nota-tanggal').textContent = utils.formatDate(t.tanggal) + ' ' + t.jam;
@@ -1340,7 +1498,13 @@
                 document.getElementById('nota-bruto').textContent = t.bruto.toFixed(2) + ' kg';
                 document.getElementById('nota-tara').textContent = t.tara.toFixed(2) + ' kg';
                 document.getElementById('nota-potongan').textContent = t.potonganPersen + '%';
-                document.getElementById('nota-netto').textContent = t.netto.toFixed(2) + ' kg';
+                
+                // Format netto sesuai setting
+                const nettoDisplay = useFloor ? 
+                    Math.floor(t.netto) + ' kg' : 
+                    t.netto.toFixed(decimalPlaces) + ' kg';
+                document.getElementById('nota-netto').textContent = nettoDisplay;
+                
                 document.getElementById('nota-harga').textContent = 'Rp ' + utils.formatRupiah(t.harga) + '/kg';
                 document.getElementById('nota-total').textContent = 'Rp ' + utils.formatRupiah(t.total);
                 document.getElementById('nota-status').textContent = t.status;
@@ -1348,16 +1512,10 @@
                 document.getElementById('modal-nota').classList.add('active');
             };
 
-            /**
-             * Close nota modal
-             */
             const closeNota = () => {
                 document.getElementById('modal-nota').classList.remove('active');
             };
 
-            /**
-             * Delete transaction
-             */
             const deleteTransaction = (id) => {
                 if (!confirm('Yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')) return;
                 
@@ -1385,7 +1543,7 @@
                 const file = input.files[0];
                 if (!file) return;
                 
-                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                if (file.size > 5 * 1024 * 1024) {
                     ui.showToast('File terlalu besar (maksimal 5MB)', 'error');
                     return;
                 }
@@ -1401,7 +1559,7 @@
                         if (results.errors.length > 0) {
                             console.warn('CSV parse warnings:', results.errors);
                         }
-                        state.currentImport = results.data.filter(row => row.supir || row.nama_supir).slice(0, 1000); // Limit 1000 rows
+                        state.currentImport = results.data.filter(row => row.supir || row.nama_supir).slice(0, 1000);
                         showPreview(state.currentImport, results.meta.fields);
                     },
                     error: (err) => {
@@ -1416,7 +1574,7 @@
                 document.getElementById('preview-section').style.display = 'block';
                 
                 const table = document.getElementById('table-preview');
-                const displayFields = fields.slice(0, 6); // Limit displayed columns
+                const displayFields = fields.slice(0, 6);
                 
                 table.querySelector('thead').innerHTML = '<tr>' + displayFields.map(f => `<th>${utils.escapeHtml(f)}</th>`).join('') + '</tr>';
                 
@@ -1449,7 +1607,15 @@
                             const tara = utils.validateNumber(row.tara || 0, 0, 100000, 2);
                             const potongan = utils.validateNumber(row.potongan || row.potongan_persen || 0, 0, 100, 2);
                             const hasil = Math.max(0, bruto - tara);
-                            const netto = Math.max(0, hasil - ((hasil * potongan) / 100));
+                            let netto = Math.max(0, hasil - ((hasil * potongan) / 100));
+                            
+                            // Apply current floor setting
+                            if (state.settings.useFloor) {
+                                netto = Math.floor(netto);
+                            } else {
+                                netto = parseFloat(netto.toFixed(state.settings.decimalPlaces));
+                            }
+                            
                             const harga = utils.validateNumber(row.harga || row.harga_per_kg || 0, 0, 1000000000, 0);
                             const admin = utils.validateNumber(row.admin || row.biaya_admin || 0, 0, 100000000, 0);
                             
@@ -1464,6 +1630,8 @@
                                 harga, admin,
                                 total: (netto * harga) + admin,
                                 status: ['Lunas', 'Dicicil', 'Belum Lunas'].includes(row.status) ? row.status : 'Lunas',
+                                useFloor: state.settings.useFloor,
+                                decimalPlaces: state.settings.decimalPlaces,
                                 createdAt: new Date().toISOString()
                             };
                             
@@ -1539,6 +1707,7 @@
             const backupJSON = () => {
                 const payload = {
                     data: state.transactions,
+                    settings: state.settings, // Include settings in backup
                     version: CONFIG.VERSION,
                     exportedAt: new Date().toISOString(),
                     checksum: utils.calculateChecksum(state.transactions)
@@ -1569,7 +1738,6 @@
                             throw new Error('Format file tidak valid');
                         }
                         
-                        // Optional: Verify checksum
                         if (payload.checksum) {
                             const currentChecksum = utils.calculateChecksum(payload.data);
                             if (currentChecksum !== payload.checksum) {
@@ -1584,6 +1752,14 @@
                         
                         if (confirm(`Restore ${restored.length} transaksi? Data akan digabungkan dengan data existing.`)) {
                             state.transactions = [...restored, ...state.transactions].slice(0, CONFIG.MAX_TRANSACTIONS);
+                            
+                            // Restore settings if available
+                            if (payload.settings) {
+                                state.settings = { ...DEFAULT_SETTINGS, ...payload.settings };
+                                storage.saveSettings();
+                                loadSettingsToForm();
+                            }
+                            
                             if (storage.save()) {
                                 updateStats();
                                 renderRecent();
@@ -1668,6 +1844,16 @@
                 }, false);
             };
 
+            // Live preview untuk settings
+            const initSettingsListeners = () => {
+                ['setting-nama', 'setting-alamat', 'setting-telepon'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', updatePreview);
+                    }
+                });
+            };
+
             // ==========================================
             // PUBLIC API
             // ==========================================
@@ -1691,13 +1877,17 @@
                 downloadTemplate,
                 backupJSON,
                 restoreJSON,
-                // Expose for debugging (remove in production)
+                // Settings
+                saveSettings,
+                resetSettings,
+                toggleFloorSetting,
+                // Expose for debugging
                 _state: () => state,
                 _config: CONFIG
             };
         })();
 
-        // Initialize on DOM ready
+        // Initialize
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', app.init);
         } else {
