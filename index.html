@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Timbangan Gas Jaya</title>
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="Sistem Pencatatan Timbangan Online & Offline">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#2563eb;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--bg:#f8fafc;--card:#fff;--text:#1e293b;--border:#e2e8f0}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+        .header{background:linear-gradient(135deg,var(--primary)0%,#1d4ed8 100%);color:#fff;padding:1rem;position:sticky;top:0;z-index:100}
+        .container{max-width:1400px;margin:0 auto;padding:1rem}
+        .nav{display:flex;gap:0.5rem;overflow-x:auto;padding:1rem 0;-webkit-overflow-scrolling:touch}
+        .nav-btn{padding:0.5rem 1rem;background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:0.5rem;cursor:pointer;white-space:nowrap;font-size:0.875rem;transition:all 0.2s}
+        .nav-btn:hover{background:rgba(255,255,255,0.2)}
+        .nav-btn.active{background:#fff;color:var(--primary);font-weight:600}
+        .card{background:var(--card);border-radius:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-bottom:1rem;overflow:hidden}
+        .card-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem}
+        .card-body{padding:1rem}
+        .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:1rem}
+        @media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
+        .stat{background:#fff;padding:1rem;border-radius:0.5rem;border-left:4px solid var(--primary);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+        .stat.success{border-left-color:var(--success)}.stat.warning{border-left-color:var(--warning)}.stat.danger{border-left-color:var(--danger)}
+        .stat-value{font-size:1.25rem;font-weight:700}
+        .form-grid{display:grid;grid-template-columns:1fr;gap:0.75rem}
+        @media(min-width:768px){.form-grid{grid-template-columns:repeat(2,1fr)}.span-2{grid-column:span 2}}
+        .form-group{margin-bottom:0.5rem}
+        .form-label{display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.25rem}
+        .form-input,.form-select{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:0.5rem;font-size:16px;background:#fff}
+        .form-input:focus,.form-select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,0.1)}
+        .input-group{display:flex;position:relative}
+        .input-prefix,.input-suffix{position:absolute;top:50%;transform:translateY(-50%);font-size:0.875rem;color:#64748b;font-weight:500}
+        .input-prefix{left:0.75rem}.input-suffix{right:0.75rem}
+        .input-group .form-input{padding-left:2.5rem}.input-group:has(.input-suffix) .form-input{padding-right:2.5rem;padding-left:0.75rem}
+        .btn{padding:0.625rem 1rem;border:none;border-radius:0.5rem;font-size:0.9375rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;min-height:44px;transition:all 0.2s}
+        .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:#1d4ed8}
+        .btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#059669}
+        .btn-warning{background:var(--warning);color:#fff}
+        .btn-danger{background:var(--danger);color:#fff}
+        .btn-outline{border:1px solid var(--border);background:#fff;color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+        .btn-sm{padding:0.375rem 0.75rem;font-size:0.875rem;min-height:36px}
+        .btn-lg{padding:0.75rem 1.5rem;font-size:1rem}
+        .calc-box{background:#f0f9ff;border:1px solid #e0f2fe;border-radius:0.5rem;padding:1rem;margin:1rem 0}
+        .calc-row{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px dashed #cbd5e1}
+        .calc-row:last-child{border:none;font-weight:700;color:var(--primary);font-size:1.125rem;border-top:2px solid #bfdbfe;margin-top:0.5rem;padding-top:0.5rem}
+        .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -1rem;padding:0 1rem}
+        table{width:100%;border-collapse:collapse;font-size:0.875rem;min-width:800px}
+        th,td{padding:0.75rem;text-align:left;border-bottom:1px solid var(--border)}
+        th{background:#f1f5f9;font-weight:600;font-size:0.75rem;text-transform:uppercase;color:#64748b;white-space:nowrap}
+        tr:hover{background:#f8fafc}
+        .badge{padding:0.25rem 0.625rem;border-radius:9999px;font-size:0.75rem;font-weight:600}
+        .badge-success{background:#d1fae5;color:#065f46}.badge-warning{background:#fef3c7;color:#92400e}.badge-danger{background:#fee2e2;color:#991b1b}
+        .upload-zone{border:2px dashed var(--border);border-radius:0.5rem;padding:2rem;text-align:center;cursor:pointer;background:var(--bg);transition:all 0.2s}
+        .upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:#f0f9ff}
+        .upload-icon{font-size:3rem;margin-bottom:0.5rem}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;padding:1rem;backdrop-filter:blur(4px)}
+        .modal.active{display:flex;align-items:center;justify-content:center}
+        .modal-content{background:#fff;border-radius:1rem;max-width:500px;width:100%;max-height:90vh;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.25)}
+        .modal-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .modal-body{padding:1rem;overflow-y:auto;max-height:60vh}
+        .modal-footer{padding:1rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:0.5rem;background:#f8fafc}
+        .nota{font-family:'Courier New',monospace;font-size:12px;line-height:1.4;padding:1rem;background:#fff}
+        .nota-header{text-align:center;border-bottom:2px solid #000;padding-bottom:0.5rem;margin-bottom:0.5rem}
+        .nota-title{font-size:16px;font-weight:bold;margin-bottom:0.25rem}
+        .nota-row{display:flex;justify-content:space-between;padding:0.125rem 0}
+        .nota-total{font-size:14px;font-weight:bold;border-top:2px solid #000;margin-top:0.5rem;padding-top:0.5rem}
+        .nota-signatures{display:flex;justify-content:space-between;margin-top:2rem;font-size:10px}
+        .sign-box{text-align:center;width:40%}.sign-line{border-top:1px solid #000;margin-top:3rem;padding-top:0.25rem}
+        .empty{text-align:center;padding:3rem;color:#64748b}
+        .empty-icon{font-size:4rem;margin-bottom:1rem}
+        .toast{position:fixed;bottom:1rem;right:1rem;background:#fff;padding:1rem 1.5rem;border-radius:0.5rem;box-shadow:0 10px 15px rgba(0,0,0,0.1);border-left:4px solid var(--success);z-index:10000;display:none;animation:toastIn 0.3s ease;min-width:300px}
+        .toast.error{border-left-color:var(--danger)}.toast.warning{border-left-color:var(--warning)}
+        @keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+        .offline{position:fixed;top:0;left:0;right:0;background:var(--warning);color:#fff;padding:0.5rem;text-align:center;z-index:9999;display:none;font-size:0.875rem;font-weight:500}
+        .offline.show{display:block}
+        .filter-bar{display:flex;gap:0.5rem;margin-bottom:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:0.5rem}
+        .search-box{position:relative;flex:1;min-width:200px}
+        .search-icon{position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#94a3b8}
+        .search-box .form-input{padding-left:2.25rem}
+        .action-btns{display:flex;gap:0.25rem}
+        .recent-item{display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#f8fafc;border-radius:0.5rem;margin-bottom:0.5rem;cursor:pointer;transition:all 0.2s}
+        .recent-item:hover{background:#e2e8f0}
+        .recent-icon{width:40px;height:40px;background:#fff;border-radius:0.5rem;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+        .recent-info{flex:1;min-width:0}
+        .recent-title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .recent-meta{font-size:0.75rem;color:#64748b}
+        .loading{position:fixed;inset:0;background:rgba(255,255,255,0.9);z-index:9998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+        .loading.active{display:flex}
+        .spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .pagination{display:flex;justify-content:center;gap:0.5rem;margin-top:1rem;flex-wrap:wrap}
+        .page-btn{padding:0.375rem 0.75rem;border:1px solid var(--border);background:#fff;border-radius:0.375rem;cursor:pointer;min-width:36px}
+        .page-btn:hover{border-color:var(--primary)}
+        .page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .page-btn:disabled{opacity:0.5;cursor:not-allowed}
+        @media print{@page{size:80mm 297mm;margin:0}body *{visibility:hidden}.nota,.nota *{visibility:visible}.nota{position:absolute;left:0;top:0;width:80mm;padding:5mm}.no-print{display:none!important}}
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div style="color:#64748b;font-size:0.875rem">Memproses data...</div>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div class="offline" id="offline">📡 Anda sedang offline - Data tersimpan lokal</div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <div style="font-weight:600;margin-bottom:0.25rem" id="toast-title">Berhasil</div>
+        <div id="toast-msg">Operasi berhasil</div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+                <div>
+                    <h1 style="font-size:1.25rem;font-weight:700">⚖️ Timbangan Gas Jaya</h1>
+                    <p style="font-size:0.75rem;opacity:0.9">Sistem Pencatatan Online & Offline</p>
+                </div>
+                <div id="conn-status" style="font-size:0.75rem;padding:0.375rem 0.75rem;background:rgba(255,255,255,0.2);border-radius:9999px;display:flex;align-items:center;gap:0.5rem">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#10b981"></span>
+                    <span>Online</span>
+                </div>
+            </div>
+            
+            <nav class="nav" id="main-nav">
+                <button class="nav-btn active" onclick="app.switchTab('dashboard', this)" aria-label="Dashboard">
+                    <span>📊</span> Dashboard
+                </button>
+                <button class="nav-btn" onclick="app.switchTab('input', this)" aria-label="Input Transaksi">
+                    <span>📝</span> Input
+                </button>
+                <button class="nav-btn" onclick="app.switchTab('riwayat', this)" aria-label="Riwayat Transaksi">
+                    <span>📋</span> Riwayat
+                </button>
+                <button class="nav-btn" onclick="app.switchTab('data', this)" aria-label="Manajemen Data">
+                    <span>💾</span> Data
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="tab-content" style="display:block" aria-label="Dashboard">
+            <div class="stats">
+                <div class="stat">
+                    <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase">Total Transaksi</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                </div>
+                <div class="stat success">
+                    <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase">Total Berat</div>
+                    <div class="stat-value"><span id="stat-berat">0</span> <small style="font-size:0.75rem">kg</small></div>
+                </div>
+                <div class="stat warning">
+                    <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase">Total Nilai</div>
+                    <div class="stat-value">Rp <span id="stat-nilai">0</span></div>
+                </div>
+                <div class="stat danger">
+                    <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase">Belum Lunas</div>
+                    <div class="stat-value" id="stat-pending">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                        <span>🕐</span> Transaksi Terbaru
+                    </h2>
+                    <button class="btn btn-outline btn-sm" onclick="app.switchTab('riwayat', document.querySelectorAll('.nav-btn')[2])">
+                        Lihat Semua →
+                    </button>
+                </div>
+                <div class="card-body" id="recent-list">
+                    <div class="empty">
+                        <div class="empty-icon">📭</div>
+                        <div style="font-weight:600;margin-bottom:0.5rem">Belum ada transaksi</div>
+                        <p style="font-size:0.875rem">Mulai dengan menambahkan transaksi baru</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INPUT -->
+        <section id="input" class="tab-content" style="display:none" aria-label="Input Transaksi">
+            <form id="form-transaksi" onsubmit="return app.saveTransaction(event)">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                            <span>📝</span> Input Timbangan Baru
+                        </h2>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="app.resetForm()">
+                            <span>↺</span> Reset
+                        </button>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Info Dasar -->
+                        <div style="margin-bottom:1.5rem">
+                            <h3 style="font-size:0.875rem;color:#64748b;text-transform:uppercase;margin-bottom:0.75rem">Informasi Dasar</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-tanggal">Tanggal *</label>
+                                    <input type="date" class="form-input" id="inp-tanggal" required aria-required="true">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-jam">Jam *</label>
+                                    <input type="time" class="form-input" id="inp-jam" required aria-required="true">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-supir">Nama Supir *</label>
+                                    <input type="text" class="form-input" id="inp-supir" list="list-supir" placeholder="Nama lengkap supir" required aria-required="true" maxlength="100">
+                                    <datalist id="list-supir"></datalist>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-plat">Plat Nomor *</label>
+                                    <input type="text" class="form-input" id="inp-plat" list="list-plat" placeholder="B 1234 ABC" required aria-required="true" maxlength="20" style="text-transform:uppercase">
+                                </div>
+                                <div class="form-group span-2">
+                                    <label class="form-label" for="inp-supplier">Nama Supplier *</label>
+                                    <input type="text" class="form-input" id="inp-supplier" list="list-supplier" placeholder="Nama perusahaan/supplier" required aria-required="true" maxlength="100">
+                                    <datalist id="list-supplier"></datalist>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Perhitungan Berat -->
+                        <div style="margin-bottom:1.5rem">
+                            <h3 style="font-size:0.875rem;color:#64748b;text-transform:uppercase;margin-bottom:0.75rem">⚖️ Perhitungan Berat</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-bruto">Berat Kotor (Bruto) *</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-input" id="inp-bruto" step="0.01" min="0" max="100000" placeholder="0" oninput="app.calculateWeight()" required aria-required="true">
+                                        <span class="input-suffix">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-tara">Tara (Kendaraan) *</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-input" id="inp-tara" step="0.01" min="0" max="100000" placeholder="0" oninput="app.calculateWeight()" required aria-required="true">
+                                        <span class="input-suffix">kg</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-potongan">Potongan (%)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-input" id="inp-potongan" value="0" step="0.01" min="0" max="100" oninput="app.calculateWeight()" aria-label="Potongan persentase">
+                                        <span class="input-suffix">%</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-netto">Berat Bersih (Netto)</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-input" id="inp-netto" readonly style="font-weight:700;color:var(--primary);font-size:1.125rem" aria-live="polite">
+                                        <span class="input-suffix">kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Keuangan -->
+                        <div style="margin-bottom:1.5rem">
+                            <h3 style="font-size:0.875rem;color:#64748b;text-transform:uppercase;margin-bottom:0.75rem">💰 Detail Keuangan</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-harga">Harga per kg *</label>
+                                    <div class="input-group">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="number" class="form-input" id="inp-harga" step="1" min="0" max="1000000000" placeholder="0" oninput="app.calculateWeight()" required aria-required="true">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-admin">Biaya Admin</label>
+                                    <div class="input-group">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="number" class="form-input" id="inp-admin" value="0" step="1" min="0" max="100000000" oninput="app.calculateWeight()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="calc-box">
+                                <div class="calc-row">
+                                    <span>Subtotal:</span>
+                                    <span>Rp <span id="calc-subtotal">0</span></span>
+                                </div>
+                                <div class="calc-row">
+                                    <span>Biaya Admin:</span>
+                                    <span>Rp <span id="calc-admin">0</span></span>
+                                </div>
+                                <div class="calc-row">
+                                    <span>Total Transfer:</span>
+                                    <span>Rp <span id="calc-total">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pembayaran -->
+                        <div style="margin-bottom:1.5rem">
+                            <h3 style="font-size:0.875rem;color:#64748b;text-transform:uppercase;margin-bottom:0.75rem">💳 Status Pembayaran</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-status">Status *</label>
+                                    <select class="form-select" id="inp-status" onchange="app.calculateWeight()" required aria-required="true">
+                                        <option value="Lunas">✅ Lunas</option>
+                                        <option value="Dicicil">⏳ Dicicil</option>
+                                        <option value="Belum Lunas">❌ Belum Lunas</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="group-dibayar" style="display:none">
+                                    <label class="form-label" for="inp-dibayar">Jumlah Dibayar</label>
+                                    <div class="input-group">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="number" class="form-input" id="inp-dibayar" step="1" min="0" max="10000000000" oninput="app.calculateWeight()">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inp-sisa">Sisa/Terutang</label>
+                                    <div class="input-group">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="text" class="form-input" id="inp-sisa" readonly aria-live="polite">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+                            <button type="submit" class="btn btn-primary btn-lg" style="flex:1;min-width:140px" id="btn-submit">
+                                <span>💾</span> Simpan Transaksi
+                            </button>
+                            <button type="button" class="btn btn-outline btn-lg" onclick="app.resetForm()" style="flex:1;min-width:140px">
+                                <span>✕</span> Batal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- RIWAYAT -->
+        <section id="riwayat" class="tab-content" style="display:none" aria-label="Riwayat Transaksi">
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                        <span>📋</span> Riwayat Transaksi
+                    </h2>
+                    <button class="btn btn-success btn-sm" onclick="app.exportCSV()">
+                        <span>📥</span> Export CSV
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="form-input" id="filter-search" placeholder="Cari supir, plat, supplier..." oninput="app.debounceRender()" aria-label="Pencarian">
+                        </div>
+                        <select class="form-select" id="filter-status" onchange="app.renderHistory()" style="width:130px;flex-shrink:0" aria-label="Filter status">
+                            <option value="">Semua Status</option>
+                            <option value="Lunas">✅ Lunas</option>
+                            <option value="Dicicil">⏳ Dicicil</option>
+                            <option value="Belum Lunas">❌ Belum Lunas</option>
+                        </select>
+                        <input type="date" class="form-input" id="filter-tanggal" onchange="app.renderHistory()" style="width:140px;flex-shrink:0" aria-label="Filter tanggal">
+                        <button class="btn btn-outline btn-sm" onclick="app.clearFilter()" style="flex-shrink:0" title="Reset filter">
+                            <span>↺</span>
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="table-riwayat">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tanggal</th>
+                                    <th scope="col">Supir</th>
+                                    <th scope="col">Plat</th>
+                                    <th scope="col">Supplier</th>
+                                    <th scope="col">Berat</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" class="no-print">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-riwayat">
+                                <tr>
+                                    <td colspan="8" style="text-align:center;padding:3rem">
+                                        <div class="empty">
+                                            <div class="empty-icon">📭</div>
+                                            <div style="font-weight:600">Belum ada transaksi</div>
+                                            <p style="font-size:0.875rem">Data akan muncul di sini setelah Anda menyimpan transaksi</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="pagination"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DATA -->
+        <section id="data" class="tab-content" style="display:none" aria-label="Manajemen Data">
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                        <span>📁</span> Import Data CSV
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-csv').click()">
+                        <div class="upload-icon">📤</div>
+                        <h3 style="font-size:1rem;margin-bottom:0.5rem">Upload File CSV</h3>
+                        <p style="color:#64748b;font-size:0.875rem;margin-bottom:0.5rem">Tap untuk memilih file atau drag & drop di sini</p>
+                        <p style="font-size:0.75rem;color:#94a3b8">Format: tanggal, jam, supir, plat, supplier, bruto, tara, potongan, harga, admin, status</p>
+                    </div>
+                    <input type="file" id="file-csv" accept=".csv" style="display:none" onchange="app.importCSV(this)" aria-label="Upload CSV">
+
+                    <div id="preview-section" style="display:none;margin-top:1.5rem">
+                        <h4 style="margin-bottom:0.75rem">Preview Data (<span id="preview-count">0</span> baris)</h4>
+                        <div class="table-container">
+                            <table id="table-preview" class="data-table">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top:1rem;display:flex;gap:0.5rem">
+                            <button class="btn btn-primary" onclick="app.processImport()">
+                                <span>✓</span> Import Data
+                            </button>
+                            <button class="btn btn-outline" onclick="app.cancelImport()">
+                                <span>✕</span> Batal
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:2rem;padding-top:2rem;border-top:2px solid var(--border)">
+                        <h3 style="font-size:1rem;margin-bottom:0.5rem">📄 Download Template</h3>
+                        <p style="color:#64748b;font-size:0.875rem;margin-bottom:1rem">Unduh template CSV untuk memastikan format data sesuai</p>
+                        <button class="btn btn-secondary" onclick="app.downloadTemplate()">
+                            <span>📥</span> Download Template CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem">
+                <div class="card-header">
+                    <h2 style="font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:0.5rem">
+                        <span>💾</span> Backup & Restore
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))">
+                        <div style="text-align:center;padding:1.5rem;background:#f8fafc;border-radius:0.5rem;border:1px solid var(--border)">
+                            <div style="font-size:3rem;margin-bottom:0.5rem">💾</div>
+                            <h4 style="margin-bottom:0.5rem">Backup Data</h4>
+                            <p style="font-size:0.875rem;color:#64748b;margin-bottom:1rem">Simpan semua data dalam format JSON</p>
+                            <button class="btn btn-success" onclick="app.backupJSON()">
+                                <span>📥</span> Backup JSON
+                            </button>
+                        </div>
+                        
+                        <div style="text-align:center;padding:1.5rem;background:#f8fafc;border-radius:0.5rem;border:1px solid var(--border)">
+                            <div style="font-size:3rem;margin-bottom:0.5rem">🔄</div>
+                            <h4 style="margin-bottom:0.5rem">Restore Data</h4>
+                            <p style="font-size:0.875rem;color:#64748b;margin-bottom:1rem">Pulihkan data dari file backup JSON</p>
+                            <input type="file" id="file-restore" accept=".json" style="display:none" onchange="app.restoreJSON(this)" aria-label="Restore JSON">
+                            <button class="btn btn-warning" onclick="document.getElementById('file-restore').click()">
+                                <span>📤</span> Restore JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Nota -->
+    <div class="modal" id="modal-nota" onclick="if(event.target===this)app.closeNota()" role="dialog" aria-modal="true" aria-labelledby="nota-title">
+        <div class="modal-content">
+            <div class="modal-header no-print">
+                <h3 style="display:flex;align-items:center;gap:0.5rem" id="nota-title">
+                    <span>🧾</span> Preview Nota
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="app.closeNota()" aria-label="Tutup">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="nota-content" class="nota">
+                    <div class="nota-header">
+                        <div class="nota-title">TIMBANGAN GAS JAYA</div>
+                        <div style="font-size:10px">Jl. Industri No. 123, Jakarta</div>
+                        <div style="font-size:10px">Telp: 021-1234567</div>
+                    </div>
+                    
+                    <div class="nota-row"><span>No:</span><span id="nota-no">-</span></div>
+                    <div class="nota-row"><span>Tanggal:</span><span id="nota-tanggal">-</span></div>
+                    <div class="nota-row"><span>Supir:</span><span id="nota-supir">-</span></div>
+                    <div class="nota-row"><span>Plat:</span><span id="nota-plat">-</span></div>
+                    <div class="nota-row"><span>Supplier:</span><span id="nota-supplier">-</span></div>
+                    
+                    <div style="border-top:1px dashed #000;border-bottom:1px dashed #000;margin:0.5rem 0;padding:0.5rem 0">
+                        <div class="nota-row"><span>Bruto:</span><span id="nota-bruto">-</span></div>
+                        <div class="nota-row"><span>Tara:</span><span id="nota-tara">-</span></div>
+                        <div class="nota-row"><span>Potongan:</span><span id="nota-potongan">-</span></div>
+                        <div class="nota-row" style="font-weight:bold"><span>Netto:</span><span id="nota-netto">-</span></div>
+                    </div>
+                    
+                    <div class="nota-row"><span>Harga/kg:</span><span id="nota-harga">-</span></div>
+                    <div class="nota-total"><span>TOTAL:</span><span id="nota-total">-</span></div>
+                    <div class="nota-row"><span>Status:</span><span id="nota-status">-</span></div>
+                    
+                    <div class="nota-signatures">
+                        <div class="sign-box">
+                            <div class="sign-line">Operator</div>
+                        </div>
+                        <div class="sign-box">
+                            <div class="sign-line">Supir</div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align:center;margin-top:1rem;font-size:9px;color:#666">
+                        Terima kasih atas kepercayaan Anda<br>
+                        <small>Nota ini sah tanpa tanda tangan basah</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer no-print">
+                <button class="btn btn-outline" onclick="app.closeNota()">Tutup</button>
+                <button class="btn btn-primary" onclick="window.print()">
+                    <span>🖨️</span> Cetak Nota
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /**
+         * Timbangan Gas Jaya - Stabilized Version
+         * Features: Namespace pattern, input validation, error handling, pagination, debounce
+         */
+        
+        const app = (function() {
+            'use strict';
+            
+            // ==========================================
+            // CONSTANTS & CONFIG
+            // ==========================================
+            const CONFIG = {
+                STORAGE_KEY: 'gasjaya_data_v2',
+                STORAGE_META: 'gasjaya_meta_v2',
+                MAX_TRANSACTIONS: 5000,
+                ITEMS_PER_PAGE: 50,
+                MAX_INPUT_LENGTH: 100,
+                DEBOUNCE_DELAY: 300,
+                VERSION: '2.0.0'
+            };
+
+            // ==========================================
+            // STATE MANAGEMENT
+            // ==========================================
+            let state = {
+                transactions: [],
+                currentImport: [],
+                editingId: null,
+                currentPage: 1,
+                isProcessing: false,
+                lastBackup: null
+            };
+
+            // ==========================================
+            // UTILITY FUNCTIONS
+            // ==========================================
+            const utils = {
+                /**
+                 * Generate unique ID dengan timestamp + random + counter
+                 */
+                generateId: (() => {
+                    let counter = 0;
+                    return () => {
+                        const timestamp = Date.now();
+                        const random = Math.floor(Math.random() * 10000);
+                        counter = (counter + 1) % 10000;
+                        return `${timestamp}-${random}-${counter}`;
+                    };
+                })(),
+
+                /**
+                 * Format number ke Rupiah
+                 */
+                formatRupiah: (num) => {
+                    if (num === null || num === undefined || isNaN(num)) return '0';
+                    return new Intl.NumberFormat('id-ID').format(Math.floor(num));
+                },
+
+                /**
+                 * Format tanggal ke Indonesia
+                 */
+                formatDate: (dateStr) => {
+                    if (!dateStr) return '-';
+                    try {
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return '-';
+                        return d.toLocaleDateString('id-ID', { 
+                            day: '2-digit', 
+                            month: 'short', 
+                            year: 'numeric' 
+                        });
+                    } catch (e) {
+                        return '-';
+                    }
+                },
+
+                /**
+                 * Escape HTML untuk mencegah XSS
+                 */
+                escapeHtml: (text) => {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = String(text);
+                    return div.innerHTML;
+                },
+
+                /**
+                 * Sanitize input text
+                 */
+                sanitizeInput: (text, maxLength = CONFIG.MAX_INPUT_LENGTH) => {
+                    if (!text) return '';
+                    return String(text).trim().slice(0, maxLength);
+                },
+
+                /**
+                 * Validate number dalam range
+                 */
+                validateNumber: (value, min = 0, max = Infinity, decimals = 2) => {
+                    const num = parseFloat(value);
+                    if (isNaN(num)) return min;
+                    if (num < min) return min;
+                    if (num > max) return max;
+                    return Number(num.toFixed(decimals));
+                },
+
+                /**
+                 * Debounce function
+                 */
+                debounce: (func, wait) => {
+                    let timeout;
+                    return function executedFunction(...args) {
+                        const later = () => {
+                            clearTimeout(timeout);
+                            func(...args);
+                        };
+                        clearTimeout(timeout);
+                        timeout = setTimeout(later, wait);
+                    };
+                },
+
+                /**
+                 * Calculate checksum sederhana untuk integritas
+                 */
+                calculateChecksum: (data) => {
+                    const str = JSON.stringify(data);
+                    let hash = 0;
+                    for (let i = 0; i < str.length; i++) {
+                        const char = str.charCodeAt(i);
+                        hash = ((hash << 5) - hash) + char;
+                        hash = hash & hash;
+                    }
+                    return Math.abs(hash).toString(16).slice(0, 8);
+                }
+            };
+
+            // ==========================================
+            // STORAGE MANAGEMENT (dengan error handling)
+            // ==========================================
+            const storage = {
+                /**
+                 * Save data dengan error handling dan size check
+                 */
+                save: () => {
+                    try {
+                        // Check storage quota
+                        const dataStr = JSON.stringify(state.transactions);
+                        const sizeInMB = (dataStr.length * 2) / (1024 * 1024);
+                        
+                        if (sizeInMB > 4.5) { // LocalStorage limit ~5MB
+                            ui.showToast('Storage hampir penuh! Silakan backup dan hapus data lama.', 'warning');
+                            return false;
+                        }
+
+                        // Save dengan metadata
+                        const payload = {
+                            data: state.transactions,
+                            checksum: utils.calculateChecksum(state.transactions),
+                            version: CONFIG.VERSION,
+                            timestamp: new Date().toISOString(),
+                            count: state.transactions.length
+                        };
+
+                        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(payload));
+                        
+                        // Update meta
+                        localStorage.setItem(CONFIG.STORAGE_META, JSON.stringify({
+                            lastUpdate: new Date().toISOString(),
+                            count: state.transactions.length
+                        }));
+
+                        return true;
+                    } catch (e) {
+                        console.error('Storage save error:', e);
+                        if (e.name === 'QuotaExceededError') {
+                            ui.showToast('Storage penuh! Hapus data lama atau backup.', 'error');
+                        } else {
+                            ui.showToast('Gagal menyimpan data: ' + e.message, 'error');
+                        }
+                        return false;
+                    }
+                },
+
+                /**
+                 * Load data dengan validasi integritas
+                 */
+                load: () => {
+                    try {
+                        const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
+                        if (!stored) {
+                            state.transactions = [];
+                            return;
+                        }
+
+                        const payload = JSON.parse(stored);
+                        
+                        // Validasi struktur
+                        if (!payload || !Array.isArray(payload.data)) {
+                            throw new Error('Format data tidak valid');
+                        }
+
+                        // Optional: Verify checksum
+                        if (payload.checksum) {
+                            const currentChecksum = utils.calculateChecksum(payload.data);
+                            if (currentChecksum !== payload.checksum) {
+                                console.warn('Checksum mismatch - data mungkin korup');
+                            }
+                        }
+
+                        state.transactions = payload.data;
+                        console.log(`Loaded ${state.transactions.length} transactions (v${payload.version || 'unknown'})`);
+                        
+                    } catch (e) {
+                        console.error('Storage load error:', e);
+                        ui.showToast('Error memuat data: ' + e.message, 'error');
+                        state.transactions = [];
+                    }
+                },
+
+                /**
+                 * Check storage usage
+                 */
+                getUsage: () => {
+                    try {
+                        let total = 0;
+                        for (let key in localStorage) {
+                            if (localStorage.hasOwnProperty(key)) {
+                                total += localStorage[key].length * 2;
+                            }
+                        }
+                        return (total / (1024 * 1024)).toFixed(2) + ' MB';
+                    } catch (e) {
+                        return 'unknown';
+                    }
+                }
+            };
+
+            // ==========================================
+            // UI FUNCTIONS
+            // ==========================================
+            const ui = {
+                /**
+                 * Show toast notification
+                 */
+                showToast: (message, type = 'success', duration = 3000) => {
+                    const toast = document.getElementById('toast');
+                    const title = document.getElementById('toast-title');
+                    const msg = document.getElementById('toast-msg');
+                    
+                    const titles = { 
+                        success: '✅ Berhasil', 
+                        error: '❌ Error', 
+                        warning: '⚠️ Perhatian',
+                        info: 'ℹ️ Info'
+                    };
+                    
+                    toast.className = 'toast show ' + type;
+                    title.textContent = titles[type] || 'Info';
+                    msg.textContent = message;
+                    
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, duration);
+                },
+
+                /**
+                 * Show/hide loading
+                 */
+                setLoading: (show) => {
+                    const el = document.getElementById('loading');
+                    if (show) el.classList.add('active');
+                    else el.classList.remove('active');
+                    state.isProcessing = show;
+                },
+
+                /**
+                 * Update connection status
+                 */
+                updateConnectionStatus: () => {
+                    const isOnline = navigator.onLine;
+                    const statusEl = document.getElementById('conn-status');
+                    const offlineEl = document.getElementById('offline');
+                    
+                    if (isOnline) {
+                        statusEl.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#10b981"></span><span>Online</span>';
+                        offlineEl.classList.remove('show');
+                    } else {
+                        statusEl.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#f59e0b"></span><span>Offline</span>';
+                        offlineEl.classList.add('show');
+                    }
+                }
+            };
+
+            // ==========================================
+            // VALIDATION
+            // ==========================================
+            const validator = {
+                /**
+                 * Validasi transaksi lengkap
+                 */
+                validateTransaction: (t) => {
+                    const errors = [];
+                    
+                    if (!t.tanggal || !/^\d{4}-\d{2}-\d{2}$/.test(t.tanggal)) {
+                        errors.push('Tanggal tidak valid');
+                    }
+                    
+                    if (!t.jam || !/^\d{2}:\d{2}$/.test(t.jam)) {
+                        errors.push('Jam tidak valid');
+                    }
+                    
+                    if (!t.supir || t.supir.length < 2) {
+                        errors.push('Nama supir minimal 2 karakter');
+                    }
+                    
+                    if (!t.plat || t.plat.length < 3) {
+                        errors.push('Plat nomor tidak valid');
+                    }
+                    
+                    if (!t.supplier || t.supplier.length < 2) {
+                        errors.push('Nama supplier minimal 2 karakter');
+                    }
+                    
+                    if (t.bruto <= 0) {
+                        errors.push('Berat bruto harus lebih dari 0');
+                    }
+                    
+                    if (t.tara < 0 || t.tara >= t.bruto) {
+                        errors.push('Tara harus lebih kecil dari bruto');
+                    }
+                    
+                    if (t.harga <= 0) {
+                        errors.push('Harga harus lebih dari 0');
+                    }
+                    
+                    if (t.potonganPersen < 0 || t.potonganPersen > 100) {
+                        errors.push('Potongan harus 0-100%');
+                    }
+                    
+                    return {
+                        isValid: errors.length === 0,
+                        errors: errors
+                    };
+                }
+            };
+
+            // ==========================================
+            // CORE FUNCTIONS
+            // ==========================================
+            
+            /**
+             * Initialize application
+             */
+            const init = () => {
+                console.log(`Gas Jaya App v${CONFIG.VERSION} Loaded`);
+                
+                storage.load();
+                initDateTime();
+                updateStats();
+                renderRecent();
+                renderHistory();
+                updateDatalists();
+                initOnlineDetection();
+                initDragDrop();
+                
+                // Check storage usage periodically
+                setInterval(() => {
+                    const usage = storage.getUsage();
+                    if (parseFloat(usage) > 4) {
+                        console.warn('Storage usage:', usage);
+                    }
+                }, 60000);
+            };
+
+            /**
+             * Initialize date/time inputs
+             */
+            const initDateTime = () => {
+                const now = new Date();
+                const dateStr = now.toISOString().split('T')[0];
+                const timeStr = now.toTimeString().slice(0, 5);
+                
+                const dateInput = document.getElementById('inp-tanggal');
+                const timeInput = document.getElementById('inp-jam');
+                
+                if (dateInput) dateInput.value = dateStr;
+                if (timeInput) timeInput.value = timeStr;
+            };
+
+            /**
+             * Switch tab dengan proper cleanup
+             */
+            const switchTab = (tabName, clickedBtn) => {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.style.display = 'none';
+                    tab.setAttribute('aria-hidden', 'true');
+                });
+                
+                // Show selected
+                const selected = document.getElementById(tabName);
+                if (selected) {
+                    selected.style.display = 'block';
+                    selected.setAttribute('aria-hidden', 'false');
+                }
+                
+                // Update nav buttons
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-current', 'false');
+                });
+                
+                if (clickedBtn) {
+                    clickedBtn.classList.add('active');
+                    clickedBtn.setAttribute('aria-current', 'page');
+                }
+                
+                // Refresh data
+                if (tabName === 'riwayat') {
+                    state.currentPage = 1;
+                    renderHistory();
+                } else if (tabName === 'dashboard') {
+                    updateStats();
+                    renderRecent();
+                }
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            /**
+             * Calculate weight dan financial
+             */
+            const calculateWeight = () => {
+                try {
+                    const bruto = utils.validateNumber(document.getElementById('inp-bruto').value, 0, 100000, 2);
+                    const tara = utils.validateNumber(document.getElementById('inp-tara').value, 0, 100000, 2);
+                    const potonganPersen = utils.validateNumber(document.getElementById('inp-potongan').value, 0, 100, 2);
+                    const harga = utils.validateNumber(document.getElementById('inp-harga').value, 0, 1000000000, 0);
+                    const admin = utils.validateNumber(document.getElementById('inp-admin').value, 0, 100000000, 0);
+                    
+                    // Validasi logic
+                    if (tara > bruto) {
+                        document.getElementById('inp-tara').classList.add('error');
+                    } else {
+                        document.getElementById('inp-tara').classList.remove('error');
+                    }
+                    
+                    // Calculate
+                    const hasil = Math.max(0, bruto - tara);
+                    const potonganKg = (hasil * potonganPersen) / 100;
+                    const netto = Math.max(0, hasil - potonganKg);
+                    
+                    const subtotal = netto * harga;
+                    const total = subtotal + admin;
+                    
+                    // Update display
+                    document.getElementById('inp-netto').value = netto.toFixed(2);
+                    document.getElementById('calc-subtotal').textContent = utils.formatRupiah(subtotal);
+                    document.getElementById('calc-admin').textContent = utils.formatRupiah(admin);
+                    document.getElementById('calc-total').textContent = utils.formatRupiah(total);
+                    
+                    // Payment status
+                    const status = document.getElementById('inp-status').value;
+                    const groupDibayar = document.getElementById('group-dibayar');
+                    const inputDibayar = document.getElementById('inp-dibayar');
+                    const inputSisa = document.getElementById('inp-sisa');
+                    
+                    if (status === 'Lunas') {
+                        groupDibayar.style.display = 'none';
+                        if (inputSisa) inputSisa.value = utils.formatRupiah(0);
+                    } else {
+                        groupDibayar.style.display = 'block';
+                        const dibayar = utils.validateNumber(inputDibayar?.value, 0, total, 0);
+                        const sisa = status === 'Belum Lunas' ? total : Math.max(0, total - dibayar);
+                        if (inputSisa) inputSisa.value = utils.formatRupiah(sisa);
+                    }
+                    
+                } catch (e) {
+                    console.error('Calculate error:', e);
+                }
+            };
+
+            /**
+             * Save transaction dengan validasi lengkap
+             */
+            const saveTransaction = (e) => {
+                e.preventDefault();
+                
+                if (state.isProcessing) return false;
+                ui.setLoading(true);
+                
+                try {
+                    // Check limit
+                    if (state.transactions.length >= CONFIG.MAX_TRANSACTIONS) {
+                        ui.showToast(`Batas maksimal ${CONFIG.MAX_TRANSACTIONS} transaksi tercapai. Backup dan hapus data lama.`, 'error');
+                        return false;
+                    }
+                    
+                    // Collect data
+                    const bruto = utils.validateNumber(document.getElementById('inp-bruto').value, 0, 100000, 2);
+                    const tara = utils.validateNumber(document.getElementById('inp-tara').value, 0, 100000, 2);
+                    const potonganPersen = utils.validateNumber(document.getElementById('inp-potongan').value, 0, 100, 2);
+                    const hasil = Math.max(0, bruto - tara);
+                    const netto = Math.max(0, hasil - ((hasil * potonganPersen) / 100));
+                    const harga = utils.validateNumber(document.getElementById('inp-harga').value, 0, 1000000000, 0);
+                    const admin = utils.validateNumber(document.getElementById('inp-admin').value, 0, 100000000, 0);
+                    const total = (netto * harga) + admin;
+                    
+                    const transaction = {
+                        id: state.editingId || utils.generateId(),
+                        tanggal: document.getElementById('inp-tanggal').value,
+                        jam: document.getElementById('inp-jam').value,
+                        supir: utils.sanitizeInput(document.getElementById('inp-supir').value),
+                        plat: utils.sanitizeInput(document.getElementById('inp-plat').value).toUpperCase(),
+                        supplier: utils.sanitizeInput(document.getElementById('inp-supplier').value),
+                        bruto: bruto,
+                        tara: tara,
+                        potonganPersen: potonganPersen,
+                        netto: netto,
+                        harga: harga,
+                        admin: admin,
+                        total: total,
+                        status: document.getElementById('inp-status').value,
+                        sisa: document.getElementById('inp-status').value === 'Lunas' ? 0 : 
+                              Math.max(0, total - utils.validateNumber(document.getElementById('inp-dibayar')?.value, 0, total, 0)),
+                        createdAt: new Date().toISOString(),
+                        updatedAt: state.editingId ? new Date().toISOString() : undefined
+                    };
+                    
+                    // Validasi
+                    const validation = validator.validateTransaction(transaction);
+                    if (!validation.isValid) {
+                        ui.showToast(validation.errors.join(', '), 'error');
+                        return false;
+                    }
+                    
+                    // Save
+                    if (state.editingId) {
+                        const idx = state.transactions.findIndex(t => t.id === state.editingId);
+                        if (idx !== -1) {
+                            state.transactions[idx] = transaction;
+                            ui.showToast('Transaksi berhasil diupdate!', 'success');
+                        }
+                        state.editingId = null;
+                    } else {
+                        state.transactions.unshift(transaction);
+                        ui.showToast('Transaksi berhasil disimpan!', 'success');
+                    }
+                    
+                    if (storage.save()) {
+                        updateStats();
+                        renderRecent();
+                        renderHistory();
+                        updateDatalists();
+                        
+                        // Ask to print
+                        setTimeout(() => {
+                            if (confirm('Cetak nota sekarang?')) {
+                                showNota(transaction.id);
+                            } else {
+                                resetForm();
+                            }
+                        }, 100);
+                    }
+                    
+                } catch (err) {
+                    console.error('Save error:', err);
+                    ui.showToast('Terjadi kesalahan: ' + err.message, 'error');
+                } finally {
+                    ui.setLoading(false);
+                }
+                
+                return false;
+            };
+
+            /**
+             * Reset form
+             */
+            const resetForm = () => {
+                document.getElementById('form-transaksi').reset();
+                state.editingId = null;
+                initDateTime();
+                document.getElementById('inp-potongan').value = '0';
+                document.getElementById('inp-admin').value = '0';
+                document.getElementById('btn-submit').innerHTML = '<span>💾</span> Simpan Transaksi';
+                calculateWeight();
+            };
+
+            /**
+             * Update statistics
+             */
+            const updateStats = () => {
+                const total = state.transactions.length;
+                const totalBerat = state.transactions.reduce((sum, t) => sum + (t.netto || 0), 0);
+                const totalNilai = state.transactions.reduce((sum, t) => sum + (t.total || 0), 0);
+                const pending = state.transactions.filter(t => t.status !== 'Lunas').length;
+                
+                document.getElementById('stat-total').textContent = total.toLocaleString('id-ID');
+                document.getElementById('stat-berat').textContent = totalBerat.toFixed(2);
+                document.getElementById('stat-nilai').textContent = (totalNilai / 1000000).toFixed(1) + 'M';
+                document.getElementById('stat-pending').textContent = pending.toLocaleString('id-ID');
+            };
+
+            /**
+             * Render recent transactions
+             */
+            const renderRecent = () => {
+                const container = document.getElementById('recent-list');
+                const recent = state.transactions.slice(0, 5);
+                
+                if (recent.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty">
+                            <div class="empty-icon">📭</div>
+                            <div style="font-weight:600;margin-bottom:0.5rem">Belum ada transaksi</div>
+                            <p style="font-size:0.875rem">Mulai dengan menambahkan transaksi baru</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = recent.map(t => {
+                    const icon = t.status === 'Lunas' ? '✅' : (t.status === 'Dicicil' ? '⏳' : '❌');
+                    return `
+                        <div class="recent-item" onclick="app.showNota('${utils.escapeHtml(t.id)}')">
+                            <div class="recent-icon">${icon}</div>
+                            <div class="recent-info">
+                                <div class="recent-title">${utils.escapeHtml(t.supir)} - ${utils.escapeHtml(t.plat)}</div>
+                                <div class="recent-meta">${utils.formatDate(t.tanggal)} • ${utils.escapeHtml(t.supplier)}</div>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="font-weight:600">Rp ${utils.formatRupiah(t.total)}</div>
+                                <div style="font-size:0.75rem;color:#64748b">${t.netto.toFixed(2)} kg</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            /**
+             * Render history dengan pagination
+             */
+            const renderHistory = () => {
+                const tbody = document.getElementById('tbody-riwayat');
+                const search = utils.sanitizeInput(document.getElementById('filter-search')?.value || '', 50).toLowerCase();
+                const statusFilter = document.getElementById('filter-status')?.value || '';
+                const tanggalFilter = document.getElementById('filter-tanggal')?.value || '';
+                
+                // Filter
+                let filtered = state.transactions.filter(t => {
+                    const matchSearch = !search || 
+                        (t.supir?.toLowerCase().includes(search)) ||
+                        (t.plat?.toLowerCase().includes(search)) ||
+                        (t.supplier?.toLowerCase().includes(search));
+                    const matchStatus = !statusFilter || t.status === statusFilter;
+                    const matchTanggal = !tanggalFilter || t.tanggal === tanggalFilter;
+                    return matchSearch && matchStatus && matchTanggal;
+                });
+                
+                // Pagination
+                const totalPages = Math.ceil(filtered.length / CONFIG.ITEMS_PER_PAGE);
+                const start = (state.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
+                const paginated = filtered.slice(start, start + CONFIG.ITEMS_PER_PAGE);
+                
+                if (paginated.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:3rem">
+                                <div class="empty">
+                                    <div class="empty-icon">🔍</div>
+                                    <div style="font-weight:600">Tidak ada data</div>
+                                    <p style="font-size:0.875rem">Coba ubah filter pencarian</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    renderPagination(0, 0);
+                    return;
+                }
+                
+                tbody.innerHTML = paginated.map(t => {
+                    const badgeClass = t.status === 'Lunas' ? 'badge-success' : 
+                                      (t.status === 'Dicicil' ? 'badge-warning' : 'badge-danger');
+                    return `
+                        <tr>
+                            <td>${utils.formatDate(t.tanggal)}<br><small style="color:#64748b">${utils.escapeHtml(t.jam)}</small></td>
+                            <td>${utils.escapeHtml(t.supir)}</td>
+                            <td>${utils.escapeHtml(t.plat)}</td>
+                            <td>${utils.escapeHtml(t.supplier)}</td>
+                            <td>${t.netto.toFixed(2)} kg</td>
+                            <td>Rp ${utils.formatRupiah(t.total)}</td>
+                            <td><span class="badge ${badgeClass}">${utils.escapeHtml(t.status)}</span></td>
+                            <td class="no-print">
+                                <div class="action-btns">
+                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();app.showNota('${utils.escapeHtml(t.id)}')" title="Cetak">🖨️</button>
+                                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();app.deleteTransaction('${utils.escapeHtml(t.id)}')" title="Hapus">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                renderPagination(totalPages, filtered.length);
+            };
+
+            /**
+             * Render pagination controls
+             */
+            const renderPagination = (totalPages, totalItems) => {
+                const container = document.getElementById('pagination');
+                if (totalPages <= 1) {
+                    container.innerHTML = '';
+                    return;
+                }
+                
+                let html = `<span style="color:#64748b;font-size:0.875rem">Total: ${totalItems} | Halaman ${state.currentPage} dari ${totalPages}</span><div style="display:flex;gap:0.25rem">`;
+                
+                // Prev
+                html += `<button class="page-btn" onclick="app.changePage(${state.currentPage - 1})" ${state.currentPage === 1 ? 'disabled' : ''}>←</button>`;
+                
+                // Page numbers (simplified)
+                const startPage = Math.max(1, state.currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="app.changePage(${i})">${i}</button>`;
+                }
+                
+                // Next
+                html += `<button class="page-btn" onclick="app.changePage(${state.currentPage + 1})" ${state.currentPage === totalPages ? 'disabled' : ''}>→</button></div>`;
+                
+                container.innerHTML = html;
+            };
+
+            /**
+             * Change page
+             */
+            const changePage = (page) => {
+                state.currentPage = page;
+                renderHistory();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            /**
+             * Debounced render untuk search
+             */
+            const debounceRender = utils.debounce(renderHistory, CONFIG.DEBOUNCE_DELAY);
+
+            /**
+             * Update datalists
+             */
+            const updateDatalists = () => {
+                const supirs = [...new Set(state.transactions.map(t => t.supir).filter(Boolean))].slice(0, 50);
+                const plats = [...new Set(state.transactions.map(t => t.plat).filter(Boolean))].slice(0, 50);
+                const suppliers = [...new Set(state.transactions.map(t => t.supplier).filter(Boolean))].slice(0, 50);
+                
+                fillDatalist('list-supir', supirs);
+                fillDatalist('list-plat', plats);
+                fillDatalist('list-supplier', suppliers);
+            };
+
+            const fillDatalist = (id, items) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = items.map(i => `<option value="${utils.escapeHtml(i)}">`).join('');
+                }
+            };
+
+            /**
+             * Clear filters
+             */
+            const clearFilter = () => {
+                document.getElementById('filter-search').value = '';
+                document.getElementById('filter-status').value = '';
+                document.getElementById('filter-tanggal').value = '';
+                state.currentPage = 1;
+                renderHistory();
+            };
+
+            /**
+             * Show nota modal
+             */
+            const showNota = (id) => {
+                const t = state.transactions.find(x => x.id === id);
+                if (!t) {
+                    ui.showToast('Transaksi tidak ditemukan', 'error');
+                    return;
+                }
+                
+                document.getElementById('nota-no').textContent = 'TRX-' + String(t.id).slice(-12);
+                document.getElementById('nota-tanggal').textContent = utils.formatDate(t.tanggal) + ' ' + t.jam;
+                document.getElementById('nota-supir').textContent = t.supir;
+                document.getElementById('nota-plat').textContent = t.plat;
+                document.getElementById('nota-supplier').textContent = t.supplier;
+                document.getElementById('nota-bruto').textContent = t.bruto.toFixed(2) + ' kg';
+                document.getElementById('nota-tara').textContent = t.tara.toFixed(2) + ' kg';
+                document.getElementById('nota-potongan').textContent = t.potonganPersen + '%';
+                document.getElementById('nota-netto').textContent = t.netto.toFixed(2) + ' kg';
+                document.getElementById('nota-harga').textContent = 'Rp ' + utils.formatRupiah(t.harga) + '/kg';
+                document.getElementById('nota-total').textContent = 'Rp ' + utils.formatRupiah(t.total);
+                document.getElementById('nota-status').textContent = t.status;
+                
+                document.getElementById('modal-nota').classList.add('active');
+            };
+
+            /**
+             * Close nota modal
+             */
+            const closeNota = () => {
+                document.getElementById('modal-nota').classList.remove('active');
+            };
+
+            /**
+             * Delete transaction
+             */
+            const deleteTransaction = (id) => {
+                if (!confirm('Yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')) return;
+                
+                const initialLength = state.transactions.length;
+                state.transactions = state.transactions.filter(t => t.id !== id);
+                
+                if (state.transactions.length < initialLength) {
+                    if (storage.save()) {
+                        updateStats();
+                        renderRecent();
+                        renderHistory();
+                        updateDatalists();
+                        ui.showToast('Transaksi berhasil dihapus', 'success');
+                    }
+                } else {
+                    ui.showToast('Transaksi tidak ditemukan', 'error');
+                }
+            };
+
+            // ==========================================
+            // IMPORT/EXPORT
+            // ==========================================
+            
+            const importCSV = (input) => {
+                const file = input.files[0];
+                if (!file) return;
+                
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    ui.showToast('File terlalu besar (maksimal 5MB)', 'error');
+                    return;
+                }
+                
+                ui.setLoading(true);
+                
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    encoding: 'UTF-8',
+                    complete: (results) => {
+                        ui.setLoading(false);
+                        if (results.errors.length > 0) {
+                            console.warn('CSV parse warnings:', results.errors);
+                        }
+                        state.currentImport = results.data.filter(row => row.supir || row.nama_supir).slice(0, 1000); // Limit 1000 rows
+                        showPreview(state.currentImport, results.meta.fields);
+                    },
+                    error: (err) => {
+                        ui.setLoading(false);
+                        ui.showToast('Error parsing CSV: ' + err.message, 'error');
+                    }
+                });
+            };
+
+            const showPreview = (data, fields) => {
+                document.getElementById('preview-count').textContent = data.length;
+                document.getElementById('preview-section').style.display = 'block';
+                
+                const table = document.getElementById('table-preview');
+                const displayFields = fields.slice(0, 6); // Limit displayed columns
+                
+                table.querySelector('thead').innerHTML = '<tr>' + displayFields.map(f => `<th>${utils.escapeHtml(f)}</th>`).join('') + '</tr>';
+                
+                const rows = data.slice(0, 5).map(row => 
+                    '<tr>' + displayFields.map(f => `<td>${utils.escapeHtml(String(row[f] || '').slice(0, 50))}</td>`).join('') + '</tr>'
+                ).join('');
+                
+                const more = data.length > 5 ? 
+                    `<tr><td colspan="${displayFields.length}" style="text-align:center;color:#666">... dan ${data.length - 5} baris lainnya</td></tr>` : '';
+                
+                table.querySelector('tbody').innerHTML = rows + more;
+            };
+
+            const processImport = () => {
+                if (!state.currentImport.length) return;
+                
+                if (state.transactions.length + state.currentImport.length > CONFIG.MAX_TRANSACTIONS) {
+                    ui.showToast(`Import akan melebihi batas ${CONFIG.MAX_TRANSACTIONS} transaksi`, 'error');
+                    return;
+                }
+                
+                ui.setLoading(true);
+                let success = 0;
+                let failed = 0;
+                
+                setTimeout(() => {
+                    state.currentImport.forEach(row => {
+                        try {
+                            const bruto = utils.validateNumber(row.bruto || row.berat_kotor || 0, 0, 100000, 2);
+                            const tara = utils.validateNumber(row.tara || 0, 0, 100000, 2);
+                            const potongan = utils.validateNumber(row.potongan || row.potongan_persen || 0, 0, 100, 2);
+                            const hasil = Math.max(0, bruto - tara);
+                            const netto = Math.max(0, hasil - ((hasil * potongan) / 100));
+                            const harga = utils.validateNumber(row.harga || row.harga_per_kg || 0, 0, 1000000000, 0);
+                            const admin = utils.validateNumber(row.admin || row.biaya_admin || 0, 0, 100000000, 0);
+                            
+                            const transaction = {
+                                id: utils.generateId(),
+                                tanggal: row.tanggal && /^\d{4}-\d{2}-\d{2}$/.test(row.tanggal) ? row.tanggal : new Date().toISOString().split('T')[0],
+                                jam: row.jam && /^\d{2}:\d{2}$/.test(row.jam) ? row.jam : '00:00',
+                                supir: utils.sanitizeInput(row.supir || row.nama_supir || ''),
+                                plat: utils.sanitizeInput(row.plat || row.plat_nomor || '').toUpperCase(),
+                                supplier: utils.sanitizeInput(row.supplier || row.nama_supplier || ''),
+                                bruto, tara, potonganPersen: potongan, netto,
+                                harga, admin,
+                                total: (netto * harga) + admin,
+                                status: ['Lunas', 'Dicicil', 'Belum Lunas'].includes(row.status) ? row.status : 'Lunas',
+                                createdAt: new Date().toISOString()
+                            };
+                            
+                            const validation = validator.validateTransaction(transaction);
+                            if (validation.isValid) {
+                                state.transactions.push(transaction);
+                                success++;
+                            } else {
+                                failed++;
+                            }
+                        } catch (e) {
+                            failed++;
+                        }
+                    });
+                    
+                    if (success > 0) {
+                        storage.save();
+                        updateStats();
+                        renderRecent();
+                        renderHistory();
+                        updateDatalists();
+                    }
+                    
+                    ui.setLoading(false);
+                    cancelImport();
+                    ui.showToast(`Import selesai: ${success} sukses, ${failed} gagal`, failed > 0 ? 'warning' : 'success');
+                }, 100);
+            };
+
+            const cancelImport = () => {
+                state.currentImport = [];
+                document.getElementById('file-csv').value = '';
+                document.getElementById('preview-section').style.display = 'none';
+            };
+
+            const exportCSV = () => {
+                if (!state.transactions.length) {
+                    ui.showToast('Tidak ada data untuk export!', 'error');
+                    return;
+                }
+                
+                const csv = Papa.unparse(state.transactions.map(t => ({
+                    tanggal: t.tanggal,
+                    jam: t.jam,
+                    supir: t.supir,
+                    plat: t.plat,
+                    supplier: t.supplier,
+                    bruto: t.bruto,
+                    tara: t.tara,
+                    potongan_persen: t.potonganPersen,
+                    netto: t.netto,
+                    harga_per_kg: t.harga,
+                    biaya_admin: t.admin,
+                    total: t.total,
+                    status: t.status
+                })));
+                
+                downloadFile(csv, `transaksi_gasjaya_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+                ui.showToast('File CSV berhasil diunduh!', 'success');
+            };
+
+            const downloadTemplate = () => {
+                const csv = 'tanggal,jam,supir,plat,supplier,bruto,tara,potongan,harga,admin,status\n';
+                const example = '2024-01-15,08:30,Budi Santono,B 1234 ABC,PT Gas Makmur,5000,1500,2,8500,50000,Lunas\n';
+                downloadFile(csv + example, 'template_gasjaya.csv', 'text/csv');
+                ui.showToast('Template diunduh!', 'success');
+            };
+
+            // ==========================================
+            // BACKUP & RESTORE
+            // ==========================================
+            
+            const backupJSON = () => {
+                const payload = {
+                    data: state.transactions,
+                    version: CONFIG.VERSION,
+                    exportedAt: new Date().toISOString(),
+                    checksum: utils.calculateChecksum(state.transactions)
+                };
+                
+                const json = JSON.stringify(payload, null, 2);
+                downloadFile(json, `backup_gasjaya_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+                ui.showToast('Backup berhasil dibuat!', 'success');
+            };
+
+            const restoreJSON = (input) => {
+                const file = input.files[0];
+                if (!file) return;
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    ui.showToast('File terlalu besar (maksimal 10MB)', 'error');
+                    return;
+                }
+                
+                ui.setLoading(true);
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    try {
+                        const payload = JSON.parse(e.target.result);
+                        
+                        if (!payload.data || !Array.isArray(payload.data)) {
+                            throw new Error('Format file tidak valid');
+                        }
+                        
+                        // Optional: Verify checksum
+                        if (payload.checksum) {
+                            const currentChecksum = utils.calculateChecksum(payload.data);
+                            if (currentChecksum !== payload.checksum) {
+                                if (!confirm('Peringatan: File mungkin korup. Lanjutkan?')) {
+                                    ui.setLoading(false);
+                                    return;
+                                }
+                            }
+                        }
+                        
+                        const restored = payload.data.slice(0, CONFIG.MAX_TRANSACTIONS);
+                        
+                        if (confirm(`Restore ${restored.length} transaksi? Data akan digabungkan dengan data existing.`)) {
+                            state.transactions = [...restored, ...state.transactions].slice(0, CONFIG.MAX_TRANSACTIONS);
+                            if (storage.save()) {
+                                updateStats();
+                                renderRecent();
+                                renderHistory();
+                                updateDatalists();
+                                ui.showToast(`Berhasil restore ${restored.length} transaksi!`, 'success');
+                            }
+                        }
+                    } catch (err) {
+                        ui.showToast('File tidak valid: ' + err.message, 'error');
+                    } finally {
+                        ui.setLoading(false);
+                        input.value = '';
+                    }
+                };
+                
+                reader.onerror = () => {
+                    ui.setLoading(false);
+                    ui.showToast('Gagal membaca file', 'error');
+                    input.value = '';
+                };
+                
+                reader.readAsText(file);
+            };
+
+            // ==========================================
+            // UTILITIES
+            // ==========================================
+            
+            const downloadFile = (content, filename, type) => {
+                const blob = new Blob([content], { type: type + ';charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            };
+
+            // ==========================================
+            // EVENT HANDLERS
+            // ==========================================
+            
+            const initOnlineDetection = () => {
+                const updateStatus = () => ui.updateConnectionStatus();
+                window.addEventListener('online', updateStatus);
+                window.addEventListener('offline', updateStatus);
+                if (!navigator.onLine) updateStatus();
+            };
+
+            const initDragDrop = () => {
+                const zone = document.getElementById('upload-zone');
+                if (!zone) return;
+                
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }, false);
+                });
+                
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => zone.classList.add('dragover'), false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    zone.addEventListener(eventName, () => zone.classList.remove('dragover'), false);
+                });
+                
+                zone.addEventListener('drop', (e) => {
+                    const files = e.dataTransfer.files;
+                    if (files.length) {
+                        document.getElementById('file-csv').files = files;
+                        importCSV({ target: { files: files } });
+                    }
+                }, false);
+            };
+
+            // ==========================================
+            // PUBLIC API
+            // ==========================================
+            return {
+                init,
+                switchTab,
+                calculateWeight,
+                saveTransaction,
+                resetForm,
+                renderHistory: debounceRender,
+                debounceRender,
+                clearFilter,
+                showNota,
+                closeNota,
+                deleteTransaction,
+                changePage,
+                importCSV,
+                processImport,
+                cancelImport,
+                exportCSV,
+                downloadTemplate,
+                backupJSON,
+                restoreJSON,
+                // Expose for debugging (remove in production)
+                _state: () => state,
+                _config: CONFIG
+            };
+        })();
+
+        // Initialize on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', app.init);
+        } else {
+            app.init();
+        }
+    </script>
+</body>
+</html>
