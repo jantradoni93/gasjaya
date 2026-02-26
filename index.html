@@ -4,286 +4,270 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Timbangan Gas Jaya</title>
+    
     <meta name="theme-color" content="#2563eb">
-    <meta name="description" content="Sistem Pencatatan Timbangan Online & Offline">
-
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Gas Jaya">
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getFirestore, collection, addDoc, serverTimestamp, enableIndexedDbPersistence 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyCN0VeIOgPIK-MNPFoNzqw-GnwZXs9Dk8A",
             authDomain: "gasjaya-e24de.firebaseapp.com",
             projectId: "gasjaya-e24de",
             storageBucket: "gasjaya-e24de.firebasestorage.app",
             messagingSenderId: "924363516081",
-            appId: "1:924363516081:web:fd90386ab0040368bc5a90",
-            measurementId: "G-Q2QFS7EL7W"
+            appId: "1:924363516081:web:fd90386ab0040368bc5a90"
         };
 
-        // Inisialisasi
-        const appFirebase = initializeApp(firebaseConfig);
-        const db = getFirestore(appFirebase);
+        const appFB = initializeApp(firebaseConfig);
+        const db = getFirestore(appFB);
 
-        // Aktifkan Offline Mode
-        enableIndexedDbPersistence(db).catch((err) => {
-            console.error("Gagal offline persistence:", err.code);
-        });
+        enableIndexedDbPersistence(db).catch(() => console.log("Offline mode active"));
 
-        // Simpan ke window agar bisa diakses oleh kode aplikasi di bawah
+        window.dbCloud = db;
         window.dbCollection = collection(db, "transaksi_gas");
+        window.fbAdd = addDoc;
+        window.fbTime = serverTimestamp;
     </script>
 
     <style>
-        /* Style dipertahankan dari file asli Anda */
+        /* CSS ASLI ANDA */
         *{margin:0;padding:0;box-sizing:border-box}
-        :root{--primary:#2563eb;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#06b6d4;--bg:#f8fafc;--card:#fff;--text:#1e293b;--border:#e2e8f0}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+        :root{--primary:#2563eb;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--bg:#f8fafc;--card:#fff;--text:#1e293b;--border:#e2e8f0}
+        body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);padding-bottom:2rem}
         .header{background:linear-gradient(135deg,var(--primary)0%,#1d4ed8 100%);color:#fff;padding:1rem;position:sticky;top:0;z-index:100}
-        .container{max-width:1400px;margin:0 auto;padding:1rem}
-        .nav{display:flex;gap:0.5rem;overflow-x:auto;padding:1rem 0;-webkit-overflow-scrolling:touch}
-        .nav-btn{padding:0.5rem 1rem;background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:0.5rem;cursor:pointer;white-space:nowrap;font-size:0.875rem;transition:all 0.2s}
-        .nav-btn.active{background:#fff;color:var(--primary);font-weight:600}
-        .card{background:var(--card);border-radius:0.75rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-bottom:1rem;overflow:hidden}
-        .card-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem}
-        .card-body{padding:1rem}
-        .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:1rem}
-        @media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
-        .stat{background:#fff;padding:1rem;border-radius:0.5rem;border-left:4px solid var(--primary)}
-        .form-grid{display:grid;grid-template-columns:1fr;gap:0.75rem}
-        @media(min-width:768px){.form-grid{grid-template-columns:repeat(2,1fr)}.span-2{grid-column:span 2}}
-        .form-group{margin-bottom:0.5rem}
-        .form-label{display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.25rem}
-        .form-input,.form-select{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:0.5rem;font-size:16px}
-        .btn{padding:0.625rem 1rem;border:none;border-radius:0.5rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem}
-        .btn-primary{background:var(--primary);color:#fff}
-        .calc-box{background:#f0f9ff;border:1px solid #e0f2fe;border-radius:0.5rem;padding:1rem;margin:1rem 0}
-        .calc-row{display:flex;justify-content:space-between;padding:0.25rem 0}
-        .toast{position:fixed;bottom:1rem;right:1rem;background:#fff;padding:1rem;border-radius:0.5rem;box-shadow:0 10px 15px rgba(0,0,0,0.1);border-left:4px solid var(--success);z-index:10000;display:none}
-        @media print{body *{visibility:hidden}.nota,.nota *{visibility:visible}.nota{position:absolute;left:0;top:0;width:80mm}}
+        .container{max-width:1200px;margin:0 auto;padding:1rem}
+        
+        /* Navigasi */
+        .nav{display:flex;gap:0.5rem;overflow-x:auto;padding:1rem 0;scrollbar-width:none}
+        .nav-btn{padding:0.6rem 1rem;background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:0.5rem;cursor:pointer;white-space:nowrap}
+        .nav-btn.active{background:#fff;color:var(--primary);font-weight:bold}
+
+        .card{background:#fff;border-radius:0.75rem;padding:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-bottom:1rem}
+        .form-group{margin-bottom:1rem}
+        label{display:block;font-size:0.875rem;font-weight:600;margin-bottom:0.25rem}
+        input,select{width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:0.5rem;font-size:16px}
+        
+        .btn{padding:0.75rem 1rem;border:none;border-radius:0.5rem;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:0.5rem}
+        .btn-primary{background:var(--primary);color:#fff;width:100%}
+        .btn-sm{padding:0.4rem 0.8rem;font-size:0.75rem}
+        .btn-print{background:var(--warning);color:#000}
+        
+        table{width:100%;border-collapse:collapse;margin-top:1rem}
+        th,td{padding:0.75rem;text-align:left;border-bottom:1px solid var(--border);font-size:0.875rem}
+
+        /* KHUSUS PRINT NOTA */
+        #area-nota{display:none}
+        @media print {
+            body * { visibility: hidden; }
+            #area-nota, #area-nota * { visibility: visible; }
+            #area-nota { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 10px; font-family: 'Courier New', monospace; }
+            .no-print { display: none; }
+        }
+        .nota-box{border:1px dashed #000;padding:15px;max-width:300px;margin:auto}
     </style>
 </head>
 <body>
-    <div class="toast" id="toast">
-        <div style="font-weight:600" id="toast-title">Berhasil</div>
-        <div id="toast-msg">Data tersimpan</div>
-    </div>
 
     <header class="header">
         <div class="container">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                    <h1>⚖️ Timbangan Gas Jaya</h1>
-                    <p style="font-size:0.75rem;opacity:0.9">Muara Badak, Kaltim - Terhubung ke Cloud</p>
-                </div>
-                <div id="conn-status" style="font-size:0.75rem;padding:0.375rem 0.75rem;background:rgba(255,255,255,0.2);border-radius:9999px">
-                    Online
-                </div>
-            </div>
+            <h2>⚖️ Timbangan Gas Jaya</h2>
             <nav class="nav">
-                <button class="nav-btn active" onclick="app.switchTab('dashboard', this)">📊 Dashboard</button>
-                <button class="nav-btn" onclick="app.switchTab('input', this)">📝 Input</button>
-                <button class="nav-btn" onclick="app.switchTab('riwayat', this)">📋 Riwayat</button>
-                <button class="nav-btn" onclick="app.switchTab('supplier', this)">🏢 Supplier</button>
-                <button class="nav-btn" onclick="app.switchTab('laporan', this)">💰 Laporan</button>
+                <button class="nav-btn active" onclick="app.tab('input', this)">Input</button>
+                <button class="nav-btn" onclick="app.tab('riwayat', this)">Riwayat</button>
+                <button class="nav-btn" onclick="app.tab('laporan', this)">Laporan</button>
+                <button class="nav-btn" onclick="app.tab('settings', this)">Pengaturan</button>
             </nav>
         </div>
     </header>
 
     <main class="container">
-        <section id="dashboard" class="tab-content" style="display:block">
-            <div class="stats">
-                <div class="stat"><div>Total Transaksi</div><div id="stat-total" style="font-weight:bold">0</div></div>
-                <div class="stat"><div>Total Berat</div><div><span id="stat-berat" style="font-weight:bold">0</span> kg</div></div>
-                <div class="stat"><div>Total Nilai</div><div>Rp <span id="stat-nilai" style="font-weight:bold">0</span></div></div>
-            </div>
-            <div id="recent-list"></div>
-        </section>
-
-        <section id="input" class="tab-content" style="display:none">
-            <form id="form-transaksi" onsubmit="return app.saveTransaction(event)">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Tanggal</label>
-                                <input type="date" class="form-input" id="inp-tanggal" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Supir</label>
-                                <input type="text" class="form-input" id="inp-supir" placeholder="Nama Supir" required>
-                            </div>
-                            <div class="form-group span-2">
-                                <label class="form-label">Supplier</label>
-                                <select class="form-select" id="inp-supplier" required>
-                                    <option value="">-- Pilih Supplier --</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Bruto (kg)</label>
-                                <input type="number" step="0.01" class="form-input" id="inp-bruto" oninput="app.calculateWeight()" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Tara (kg)</label>
-                                <input type="number" step="0.01" class="form-input" id="inp-tara" oninput="app.calculateWeight()" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Netto (kg)</label>
-                                <input type="text" class="form-input" id="inp-netto" readonly style="font-weight:bold;color:var(--primary)">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Harga per kg</label>
-                                <input type="number" class="form-input" id="inp-harga" oninput="app.calculateWeight()" required>
-                            </div>
-                        </div>
-                        <div class="calc-box">
-                            <div class="calc-row"><span>Total Bayar:</span><span id="calc-total" style="font-weight:bold">Rp 0</span></div>
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%">💾 Simpan & Sinkron Cloud</button>
-                    </div>
+        <section id="tab-input" class="card">
+            <form onsubmit="app.save(event)">
+                <div class="form-group"><label>Tanggal</label><input type="date" id="inp-tgl" required></div>
+                <div class="form-group"><label>Supplier</label><select id="inp-sup" required></select></div>
+                <div class="form-group"><label>Customer/Supir</label><input type="text" id="inp-nama" required></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    <div class="form-group"><label>Bruto</label><input type="number" step="0.01" id="inp-bruto" oninput="app.calc()" required></div>
+                    <div class="form-group"><label>Tara</label><input type="number" step="0.01" id="inp-tara" oninput="app.calc()" required></div>
                 </div>
+                <div class="form-group"><label>Netto</label><input type="text" id="inp-netto" readonly style="background:#f1f5f9"></div>
+                <div class="form-group"><label>Harga/Kg</label><input type="number" id="inp-harga" oninput="app.calc()" required></div>
+                <h3 id="display-total" style="margin-bottom:1rem;color:var(--primary)">Total: Rp 0</h3>
+                <button type="submit" class="btn btn-primary">💾 Simpan & Sinkron Cloud</button>
             </form>
         </section>
 
-        <section id="riwayat" class="tab-content" style="display:none">
-            <div id="history-body"></div>
-        </section>
-        
-        <section id="supplier" class="tab-content" style="display:none">
-             <div class="card">
-                 <div class="card-body">
-                    <h3>Kelola Supplier</h3>
-                    <input type="text" id="sup-name" class="form-input" placeholder="Nama Supplier">
-                    <button class="btn btn-primary" onclick="app.saveSupplier()" style="margin-top:10px">Tambah</button>
-                    <div id="supplier-list-display" style="margin-top:20px"></div>
-                 </div>
-             </div>
+        <section id="tab-riwayat" class="card" style="display:none">
+            <h3>📋 Daftar Timbangan</h3>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead><tr><th>Tanggal</th><th>Nama</th><th>Netto</th><th>Aksi</th></tr></thead>
+                    <tbody id="list-riwayat"></tbody>
+                </table>
+            </div>
         </section>
 
-        <section id="laporan" class="tab-content" style="display:none">
-            <div id="laporan-body"></div>
+        <section id="tab-laporan" class="card" style="display:none">
+            <h3>💰 Ringkasan Pembayaran</h3>
+            <div id="list-laporan"></div>
+        </section>
+
+        <section id="tab-settings" class="card" style="display:none">
+            <h3>⚙️ Pengaturan Supplier</h3>
+            <div class="form-group">
+                <input type="text" id="new-sup" placeholder="Nama Supplier Baru...">
+                <button class="btn btn-primary" onclick="app.addSup()" style="margin-top:0.5rem">+ Tambah Supplier</button>
+            </div>
+            <hr><br>
+            <button class="btn btn-sm" style="background:var(--danger);color:#fff" onclick="app.clearData()">Hapus Semua Data</button>
         </section>
     </main>
 
+    <div id="area-nota">
+        <div class="nota-box">
+            <center>
+                <strong>GAS JAYA - MUARA BADAK</strong><br>
+                Nota Timbangan Digital<br>
+                --------------------------
+            </center>
+            <table style="width:100%;font-size:12px">
+                <tr><td>Tgl:</td><td id="n-tgl"></td></tr>
+                <tr><td>Nama:</td><td id="n-nama"></td></tr>
+                <tr><td>Sup:</td><td id="n-sup"></td></tr>
+                <tr><td colspan="2">--------------------------</td></tr>
+                <tr><td>Bruto:</td><td id="n-bruto"></td></tr>
+                <tr><td>Tara:</td><td id="n-tara"></td></tr>
+                <tr><td>Netto:</td><td id="n-netto"></td></tr>
+                <tr><td>Harga:</td><td id="n-harga"></td></tr>
+                <tr><td colspan="2">--------------------------</td></tr>
+                <tr><td><strong>TOTAL:</strong></td><td><strong id="n-total"></strong></td></tr>
+            </table>
+            <br>
+            <center>Terima Kasih</center>
+        </div>
+    </div>
+
     <script>
         const app = (() => {
-            const STORAGE_KEY = 'gas_jaya_v2';
-            const SUPPLIER_KEY = 'gas_jaya_suppliers';
-            
-            let state = {
-                transactions: JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'),
-                suppliers: JSON.parse(localStorage.getItem(SUPPLIER_KEY) || '[]')
-            };
+            let db = JSON.parse(localStorage.getItem('gas_db') || '[]');
+            let sups = JSON.parse(localStorage.getItem('gas_sups') || '["GUDANG PUSAT"]');
 
             const init = () => {
-                document.getElementById('inp-tanggal').valueAsDate = new Date();
-                renderSuppliers();
-                updateStats();
+                document.getElementById('inp-tgl').valueAsDate = new Date();
+                renderSups();
+                renderRiwayat();
             };
 
-            const switchTab = (tabId, btn) => {
-                document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-                document.getElementById(tabId).style.display = 'block';
+            const tab = (id, btn) => {
+                document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+                document.getElementById('tab-'+id).style.display = 'block';
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                if(id === 'laporan') renderLaporan();
             };
 
-            const calculateWeight = () => {
-                const bruto = parseFloat(document.getElementById('inp-bruto').value) || 0;
-                const tara = parseFloat(document.getElementById('inp-tara').value) || 0;
-                const harga = parseFloat(document.getElementById('inp-harga').value) || 0;
-                const netto = bruto - tara;
-                document.getElementById('inp-netto').value = netto.toFixed(2);
-                document.getElementById('calc-total').textContent = 'Rp ' + (netto * harga).toLocaleString('id-ID');
+            const calc = () => {
+                const b = parseFloat(document.getElementById('inp-bruto').value) || 0;
+                const t = parseFloat(document.getElementById('inp-tara').value) || 0;
+                const h = parseFloat(document.getElementById('inp-harga').value) || 0;
+                const n = b - t;
+                document.getElementById('inp-netto').value = n.toFixed(2);
+                document.getElementById('display-total').innerText = `Total: Rp ${(n * h).toLocaleString()}`;
             };
 
-            // FUNGSI SIMPAN DENGAN FIREBASE
-            const saveTransaction = async (e) => {
+            const save = async (e) => {
                 e.preventDefault();
-                
-                const data = {
-                    tanggal: document.getElementById('inp-tanggal').value,
-                    supir: document.getElementById('inp-supir').value,
-                    supplier: document.getElementById('inp-supplier').value,
-                    bruto: parseFloat(document.getElementById('inp-bruto').value),
-                    tara: parseFloat(document.getElementById('inp-tara').value),
-                    netto: parseFloat(document.getElementById('inp-netto').value),
-                    harga: parseFloat(document.getElementById('inp-harga').value),
-                    total: parseFloat(document.getElementById('inp-netto').value) * parseFloat(document.getElementById('inp-harga').value),
-                    timestamp: new Date().toISOString()
+                const item = {
+                    id: Date.now(),
+                    tgl: document.getElementById('inp-tgl').value,
+                    sup: document.getElementById('inp-sup').value,
+                    nama: document.getElementById('inp-nama').value,
+                    bruto: document.getElementById('inp-bruto').value,
+                    tara: document.getElementById('inp-tara').value,
+                    netto: document.getElementById('inp-netto').value,
+                    harga: document.getElementById('inp-harga').value,
+                    total: parseFloat(document.getElementById('inp-netto').value) * parseFloat(document.getElementById('inp-harga').value)
                 };
 
-                // 1. Simpan Lokal
-                state.transactions.unshift(data);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.transactions));
+                db.unshift(item);
+                localStorage.setItem('gas_db', JSON.stringify(db));
 
-                // 2. Sinkron ke Cloud Google
-                if (window.dbCollection) {
+                // SYNC KE GOOGLE FIREBASE
+                if(window.fbAdd) {
                     try {
-                        const { addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-                        await addDoc(window.dbCollection, {
-                            ...data,
-                            createdAt: serverTimestamp() // Waktu server Google
-                        });
-                        showToast('Berhasil', 'Data masuk ke Cloud Google!');
-                    } catch (err) {
-                        console.error("Firebase Error:", err);
-                        showToast('Tersimpan Lokal', 'Data disimpan di HP, akan sinkron saat online.', 'warning');
-                    }
+                        await window.fbAdd(window.dbCollection, {...item, created: window.fbTime()});
+                    } catch(err) { console.log("Offline - Data disimpan di HP"); }
                 }
 
-                document.getElementById('form-transaksi').reset();
-                document.getElementById('inp-tanggal').valueAsDate = new Date();
-                updateStats();
-                return false;
+                alert("Data Berhasil Disimpan!");
+                document.getElementById('inp-nama').value = "";
+                document.getElementById('inp-bruto').value = "";
+                renderRiwayat();
             };
 
-            const saveSupplier = () => {
-                const name = document.getElementById('sup-name').value;
-                if(!name) return;
-                state.suppliers.push({name});
-                localStorage.setItem(SUPPLIER_KEY, JSON.stringify(state.suppliers));
-                renderSuppliers();
-                document.getElementById('sup-name').value = '';
+            const renderRiwayat = () => {
+                const html = db.map(i => `
+                    <tr>
+                        <td>${i.tgl}</td>
+                        <td>${i.nama}</td>
+                        <td>${i.netto} kg</td>
+                        <td>
+                            <button class="btn btn-sm btn-print" onclick="app.print(${i.id})">🖨️ Cetak</button>
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('list-riwayat').innerHTML = html;
             };
 
-            const renderSuppliers = () => {
-                const select = document.getElementById('inp-supplier');
-                select.innerHTML = '<option value="">-- Pilih Supplier --</option>' + 
-                    state.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            const renderLaporan = () => {
+                const res = db.reduce((acc, curr) => {
+                    acc[curr.sup] = (acc[curr.sup] || 0) + curr.total;
+                    return acc;
+                }, {});
                 
-                const display = document.getElementById('supplier-list-display');
-                display.innerHTML = state.suppliers.map(s => `<div class="card" style="padding:10px;margin-bottom:5px">${s.name}</div>`).join('');
+                document.getElementById('list-laporan').innerHTML = Object.keys(res).map(s => `
+                    <div style="display:flex;justify-content:space-between;padding:0.5rem;border-bottom:1px solid #eee">
+                        <span>${s}</span>
+                        <strong>Rp ${res[s].toLocaleString()}</strong>
+                    </div>
+                `).join('') || 'Belum ada data.';
             };
 
-            const updateStats = () => {
-                document.getElementById('stat-total').textContent = state.transactions.length;
-                const totalBerat = state.transactions.reduce((acc, curr) => acc + curr.netto, 0);
-                const totalNilai = state.transactions.reduce((acc, curr) => acc + curr.total, 0);
-                document.getElementById('stat-berat').textContent = totalBerat.toFixed(2);
-                document.getElementById('stat-nilai').textContent = totalNilai.toLocaleString('id-ID');
+            const print = (id) => {
+                const i = db.find(x => x.id === id);
+                document.getElementById('n-tgl').innerText = i.tgl;
+                document.getElementById('n-nama').innerText = i.nama;
+                document.getElementById('n-sup').innerText = i.sup;
+                document.getElementById('n-bruto').innerText = i.bruto + " kg";
+                document.getElementById('n-tara').innerText = i.tara + " kg";
+                document.getElementById('n-netto').innerText = i.netto + " kg";
+                document.getElementById('n-harga').innerText = "Rp " + parseInt(i.harga).toLocaleString();
+                document.getElementById('n-total').innerText = "Rp " + i.total.toLocaleString();
+                window.print();
             };
 
-            const showToast = (title, msg) => {
-                const t = document.getElementById('toast');
-                document.getElementById('toast-title').textContent = title;
-                document.getElementById('toast-msg').textContent = msg;
-                t.style.display = 'block';
-                setTimeout(() => t.style.display = 'none', 3000);
+            const addSup = () => {
+                const n = document.getElementById('new-sup').value;
+                if(!n) return;
+                sups.push(n.toUpperCase());
+                localStorage.setItem('gas_sups', JSON.stringify(sups));
+                renderSups();
+                document.getElementById('new-sup').value = "";
             };
 
-            return { init, switchTab, calculateWeight, saveTransaction, saveSupplier };
+            const renderSups = () => {
+                document.getElementById('inp-sup').innerHTML = sups.map(s => `<option value="${s}">${s}</option>`).join('');
+            };
+
+            const clearData = () => { if(confirm("Hapus semua riwayat?")) { localStorage.removeItem('gas_db'); location.reload(); }};
+
+            return { init, tab, calc, save, print, addSup, clearData };
         })();
 
         app.init();
